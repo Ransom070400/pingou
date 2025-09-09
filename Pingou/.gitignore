@@ -16,7 +16,7 @@ expo-env.d.ts
 .qodo
 .vscode/
 
-// env local file
+#env local file
 .env.local
 
 
