@@ -12,6 +12,13 @@ web-build/
 # expo router
 expo-env.d.ts
 
+.github/
+.qodo
+.vscode/
+
+// env local file
+.env.local
+
 
 
 ios
