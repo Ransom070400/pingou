@@ -11,6 +11,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-apple-authentication",
       [
         "expo-dev-launcher",
         {
@@ -33,7 +34,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+       "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

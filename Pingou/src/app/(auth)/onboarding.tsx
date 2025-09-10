@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
 import React, { useState } from 'react'
 import OnboardingCard from '../../components/OnboardingCard'
+import { router } from 'expo-router'
 
 // Card metadata array
 const onboardingCards = [
@@ -123,7 +124,8 @@ const Onboarding = () => {
                 setRemainingCards(prev => prev.slice(0, -1))
               } else {
                 // Handle final card - navigate to next screen or complete onboarding
-                console.log('Onboarding completed!')
+                //TO-DO make sure you save locally that the onboarding is complete
+                router.push("/(auth)/signin")
               }
             }}
           >
