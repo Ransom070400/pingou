@@ -2,7 +2,7 @@
 import React, { useState, memo } from 'react'
 // Import building blocks for UI
 import { View, ScrollView, Text, TextInput, Pressable, Image, Platform, StyleSheet, TouchableOpacity, Alert } from 'react-native'
-import { Mail, Lock } from 'lucide-react-native'
+import { Mail, Lock, SquareCheckIcon } from 'lucide-react-native'
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { handleLoginUtil, handleLoginWithAppleAuthUtil } from '~/src/utils/signInUtils';
 import { router } from 'expo-router';
@@ -71,7 +71,8 @@ export default function SignIn() {
                   style={styles.button}
 
                  onPress={async () => {
-                  const { success, error } = await handleLoginWithAppleAuthUtil()
+                  const { success, error } = await handleLoginWithAppleAuthUtil();
+                  console.log(success)
                   if (success){
                     router.replace("/(tabs)")
                   } else {
@@ -157,7 +158,7 @@ export default function SignIn() {
 
       {/* Footer link */}
       <View className="items-center mt-6">
-        <Text className="text-xs text-neutral-600">
+        <Text onPress={() => router.replace("/(auth)/signup")} className="text-xs text-neutral-600">
           {/* Combine plain + link style */}
           Don’t have an account? <Text className="text-amber-600">Sign up</Text>
         </Text>

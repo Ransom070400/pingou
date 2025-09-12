@@ -49,6 +49,7 @@ export const handleLoginWithAppleAuthUtil = async (): Promise<LoginReturnType> =
       });
 
 
+
       if (appleError) {
       return {
         error: appleError!,

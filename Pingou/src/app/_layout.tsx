@@ -13,9 +13,20 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const { profile, session, loading } = useAuth();
 
-   // If auth is loading, show a centered placeholder (simple splash).
+
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
+  )
+}
+
+
+function RootLayoutNav(){
+    const colorScheme = useColorScheme();
+          const { profile, session, loading } = useAuth();
+         // If auth is loading, show a centered placeholder (simple splash)
   if (loading) {
     return (
       // Full screen container centered for the placeholder.
@@ -31,14 +42,14 @@ export default function RootLayout() {
       </View>
     );
   }
+      return (
 
-  const colorScheme = useColorScheme();
-  return (
-     <AuthProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Protected guard={true}> //!session
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack.Protected>
             <Stack.Protected guard={!!session}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack.Protected>
@@ -46,6 +57,5 @@ export default function RootLayout() {
         </Stack>
     </ThemeProvider>
   </GestureHandlerRootView>
-    </AuthProvider>
 );
 }
