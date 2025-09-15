@@ -12,6 +12,8 @@ Do not over engineer. Make sure to make the functionality as simple as possible.
 Make sure to never over engineer the code. Do it the most efficient and simplest way possible, but not so simple we sacrifice performance or security.
 Do not use SafeAreaViews.
 I WANT TO LEARN THE INTERNALS OF REACT NATIVE SO PLEASE CONSIDER THAT WHEN EXPLAIN STUFF TO ME.
+Always use code output examples when explaining line of code you've written.
+Always account for dark mode and light mode when building components. 
  
 
  ALWAYS REFERENCE THE EXPO DOCS IF NECESSARY AT = https://docs.expo.dev/llms-full.txt

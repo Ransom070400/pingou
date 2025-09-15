@@ -1,43 +1,60 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
-// Use the Expo Router to navigate between screens in the app router.
-import { router } from 'expo-router'
+// Import the shared card chrome component
 import OnboardingCard from './OnboardingCard'
 
-/* Props: optional initial values and an optional callback when continuing. */
+// Define props for NameCard (added currentStep & totalSteps to fix TS2322)
 type Props = {
+  // One‑time seed for name input
   initialName?: string
+  // One‑time seed for bio input
   initialBio?: string
+  // Callback fired when Continue pressed
   onContinue?: (payload: { name: string; bio: string }) => void
+  // ADDED: 1-based current step index (optional)
+  currentStep?: number
+  // ADDED: total number of steps (optional)
+  totalSteps?: number
 }
 
-/* NameCard: collects name + bio and navigates to the next onboarding screen on continue. */
-export default function NameCard({ initialName = '', initialBio = '', onContinue }: Props) {
-  // Local state for the form fields.
+/* NameCard: collects name + bio, emits values upward */
+export default function NameCard({
+  initialName = '',
+  initialBio = '',
+  onContinue,
+  currentStep,  
+  totalSteps
+}: Props) {
+  // Local state for controlled TextInput (initialName seeds this once)
   const [name, setName] = useState(initialName)
-  // Local state for the bio texta\rea.
+  // Local state for bio field
   const [bio, setBio] = useState(initialBio)
 
+  // Derived: enable button only if name not empty (simple UX improvement)
+  const canContinue = name.trim().length > 0
 
-  // Handle continue press: call optional callback and navigate to socials screen.
+  // Handler for button
   const handleContinue = () => {
-    // Call the optional callback so parent components can capture the values.
-    if (onContinue) onContinue({ name, bio })
-
-    // Navigate to the next onboarding step.
-    // Adjust the path to match your file in app/(auth)/ — here we assume a "socials" screen exists.
-    // router.push('/(auth)/socials')
+    // Guard: do nothing if invalid (defensive)
+    if (!canContinue) return
+    // Emit snapshot to parent
+    onContinue?.({ name, bio })
   }
 
   return (
-    // Use the shared OnboardingCard for consistent chrome and progress line.
-    <OnboardingCard progress={0.25} title="What's your name" subtitle="We want to know you">
-      {/* Name input */}
+    // Pass segmented progress props into OnboardingCard (instead of progress=0.25)
+    <OnboardingCard
+      currentStep={currentStep}
+      totalSteps={totalSteps}
+      title="What's your name"
+      subtitle="We want to know you"
+    >
+      {/* Name field */}
       <View className="mb-4">
         <Text className="text-sm font-medium text-neutral-700 mb-2">Your name</Text>
         <TextInput
-          // Simple NativeWind styling for the input.
-          className="h-12 border border-neutral-300 rounded-lg px-4 text-sm text-neutral-900 bg-white"
+          // Rounded pill style, border for contrast
+          className="h-12 border border-neutral-300 rounded-2xl px-4 text-sm text-neutral-900 bg-white dark:bg-neutral-900"
           placeholder="Type your name"
           value={name}
           onChangeText={setName}
@@ -45,11 +62,11 @@ export default function NameCard({ initialName = '', initialBio = '', onContinue
         />
       </View>
 
-      {/* Bio input */}
+      {/* Bio field */}
       <View className="mb-6">
         <Text className="text-sm font-medium text-neutral-700 mb-2">Your Bio</Text>
         <TextInput
-          className="h-20 border border-neutral-300 rounded-lg px-4 py-3 text-sm text-neutral-900 bg-white"
+          className="h-24 border border-neutral-300 rounded-2xl px-4 py-3 text-sm text-neutral-900 bg-white dark:bg-neutral-900"
           placeholder="type what you do here..."
           value={bio}
           onChangeText={setBio}
@@ -58,10 +75,16 @@ export default function NameCard({ initialName = '', initialBio = '', onContinue
         />
       </View>
 
-      {/* Continue button that triggers navigation */}
-      <TouchableOpacity className="h-12 bg-black rounded-full items-center justify-center flex-row" onPress={handleContinue}>
+      {/* Continue button */}
+      <TouchableOpacity
+        onPress={handleContinue}
+        disabled={!canContinue}
+        className={`h-12 rounded-full flex-row items-center justify-center ${
+          canContinue ? 'bg-black' : 'bg-neutral-400'
+        }`}
+      >
         <Text className="text-white font-semibold text-sm mr-3">Continue</Text>
-        <View className="bg-white rounded-full w-8 h-8 items-center justify-center">
+        <View className="bg-white dark:bg-neutral-200 rounded-full w-8 h-8 items-center justify-center">
           <Text className="text-black">→</Text>
         </View>
       </TouchableOpacity>
