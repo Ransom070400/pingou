@@ -47,7 +47,7 @@ function RootLayoutNav(){
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-        <Stack.Protected guard={true}> //!session
+        <Stack.Protected guard={!session}> //!session
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
             <Stack.Protected guard={!!session}>

@@ -44,6 +44,16 @@ export default function SocialsCard({
   const updateExtra = (text: string, idx: number) =>
     setExtras(prev => prev.map((v, i) => (i === idx ? text : v)))
 
+  // Helper: clean extras before sending upward (trim, drop blanks, dedupe)
+  const sanitizeExtras = (values: string[]) => {
+    // Trim each, keep non-empty
+    const cleaned = values
+      .map(v => v.trim())
+      .filter(v => v.length > 0)
+    // Deduplicate while preserving order
+    return Array.from(new Set(cleaned))
+  }
+
   return (
     <OnboardingCard
       currentStep={currentStep}
@@ -121,7 +131,15 @@ export default function SocialsCard({
         <TouchableOpacity
           disabled={!hasAny}
           onPress={() =>
-            onContinue({ phone, instagram, x, linkedin, extras })
+            onContinue({
+              phone,
+              instagram,
+              // Map local 'x' state to canonical field name you store (twitter)
+              x,
+              linkedin,
+              // Pass sanitized extras
+              extras: sanitizeExtras(extras)
+            })
           }
           className={`flex-row flex-1 h-12 rounded-full items-center justify-center ${
             hasAny ? 'bg-black' : 'bg-neutral-400'

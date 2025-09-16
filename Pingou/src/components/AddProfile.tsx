@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { Camera } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 // Import the shared card chrome component
 import OnboardingCard from './OnboardingCard';
 
@@ -15,6 +16,19 @@ interface Props {
 
 export default function AddProfileCard({ currentStep, totalSteps, onBack, onContinue }: Props) {
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+    const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
 
   // Derived: enable button only if imageUri is set
   const hasAny = !!imageUri;
@@ -35,7 +49,7 @@ export default function AddProfileCard({ currentStep, totalSteps, onBack, onCont
             accessibilityLabel="Add profile photo">
             {imageUri ? (
               // Show chosen image filling the circle; resizeMode cover crops to fit
-              <Image source={{ uri: imageUri }} className="h-full w-full" resizeMode="cover" />
+              <Image source={{ uri: imageUri }} className="h-44 w-44" resizeMode="cover" />
             ) : (
               // Placeholder: Pingou logo centered inside grey circle
               <Image
@@ -60,7 +74,7 @@ export default function AddProfileCard({ currentStep, totalSteps, onBack, onCont
         {/* Camera badge positioned bottom-right inside the circle */}
         <TouchableOpacity
           // Absolute positioning relative to parent .relative
-          onPress={() => console.log('Hey')}
+          onPress={pickImage}
           className="absolute bottom-3 right-[75px]"
           accessibilityLabel="Open photo picker">
           {/* Small circular badge with icon; adapts to dark mode */}
@@ -80,7 +94,7 @@ export default function AddProfileCard({ currentStep, totalSteps, onBack, onCont
         </TouchableOpacity>
         <TouchableOpacity
           disabled={!hasAny}
-          onPress={() => onContinue('')}
+          onPress={() => onContinue(imageUri!)} // Pass imageUri here when ready
           className={`h-12 flex-1 flex-row items-center justify-center rounded-full ${
             hasAny ? 'bg-black' : 'bg-neutral-400'
           }`}>
