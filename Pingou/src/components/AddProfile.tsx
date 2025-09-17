@@ -45,7 +45,7 @@ export default function AddProfileCard({ currentStep, totalSteps, onBack, onCont
           <TouchableOpacity
             // Larger circle for better UI (w-48 ~ 192px). Dark mode friendly bg.
             className="h-58 w-58 items-center justify-center overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"
-            onPress={() => console.log('Hey')}
+            onPress={pickImage}
             accessibilityLabel="Add profile photo">
             {imageUri ? (
               // Show chosen image filling the circle; resizeMode cover crops to fit

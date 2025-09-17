@@ -39,8 +39,8 @@ const Index: React.FC = () => {
         contentContainerStyle={{ paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Sign out button */}
-        <TouchableOpacity
+        {/* //Sign out button */}
+        {/* <TouchableOpacity
           onPress={() => supabase.auth.signOut()}
           className="self-end m-4 px-4 py-2 rounded-full bg-neutral-900 dark:bg-neutral-100"
           activeOpacity={0.6}
@@ -48,7 +48,7 @@ const Index: React.FC = () => {
           <Text className="text-sm font-medium text-white dark:text-black">
             Sign Out
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Header */}
         <ProfileHeader
