@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react'
+import React, { useMemo,useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { supabase } from '~/src/lib/supabase'
 
+
 // Child components
 import ProfileHeader from '~/src/components/profile/ProfileHeader'
-import StatsRow from '~/src/components/profile/StatsRow'
+import { StatsCard } from '~/src/components/profile/StatsRow'
 import ContactInfo from '~/src/components/profile/ContactInfo'
 import SocialLinks from '~/src/components/profile/SocialLinks'
 import ProfileQRCode from '~/src/components/profile/ProfileQRCode'
@@ -16,14 +17,14 @@ import { buildSocialLinks } from '~/src/utils/buildSocialLinks'
 // Mock profile data (replace later with Supabase fetch)
 const mockProfile: ProfileType = {
   user_id: 'uuid-123',
-  email: 'ogechukwucarolineogechi@gmail.com',
-  nickname: 'oge',
-  fullname: 'Ogechukwu Caroline',
+  email: 'daveydenco@gmail.com',
+  nickname: 'davey',
+  fullname: 'Davey Eke',
   instagram: 'instagram.com/username',
   twitter: 'x.com/formerly_twitter',
-  linkedin: 'linkedin.com/in/ogechukwu',
+  linkedin: 'linkedin.com/daveyeke',
   phone: '08123456789',
-  extras: ['behance.net/ogechukwu'],
+  extras: ['behance.net/daveyeke'],
   created_at: '2025-09-16T00:00:00Z',
   updated_at: '2025-09-16T00:00:00Z'
 }
@@ -31,6 +32,8 @@ const mockProfile: ProfileType = {
 const Index: React.FC = () => {
   // Memoize built social links so they are not rebuilt on unrelated re-renders.
   const socialList = useMemo(() => buildSocialLinks(mockProfile), [])
+ 
+  
 
   return (
     <View className="flex-1 bg-neutral-100 dark:bg-neutral-900">
@@ -53,12 +56,12 @@ const Index: React.FC = () => {
         {/* Header */}
         <ProfileHeader
           fullName={mockProfile.fullname}
-          tagline="I design for a living"
-          avatarUrl={mockProfile.profile_url}
+          tagline="I write production code"
+          avatarUrl={mockProfile.profile_url} // Pass the selected image URI as avatarUrl}
         />
 
         {/* Stats */}
-        <StatsRow tokens={0} connections={10} />
+        <StatsCard pingTokens={0} connections={10} />
 
         {/* QR Code */}
         <View className="mt-8">

@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react'
+// import RN primitives
 import { View, Text } from 'react-native'
-// If you have a QR lib installed (e.g. react-native-qrcode-svg) uncomment below:
-// import QRCode from 'react-native-qrcode-svg'
+// render the QR image
+import QRCode from 'react-native-qrcode-svg'
 
 interface ProfileQRCodeProps {
   // The unique user id we encode
@@ -15,52 +16,49 @@ interface ProfileQRCodeProps {
 const ProfileQRCode: React.FC<ProfileQRCodeProps> = ({
   userId,
   valueOverride,
-  size = 160
+  size = 200
 }) => {
   // Build the value ONCE per userId/valueOverride change.
-  // useMemo caches the computed string; cheap now but shows correct pattern.
-  const qrValue = useMemo(
-    () => valueOverride ?? `pingou:user:${userId}`,
-    [userId, valueOverride]
-  )
+  // const qrValue = useMemo(
+  //   () => valueOverride ?? `pingou:user:${userId}`,
+  //   [userId, valueOverride]
+  // )
 
   return (
+    // Card container: rounded, padded, and theme-aware background
     <View className="bg-white dark:bg-neutral-900 rounded-2xl p-6 mx-4 shadow-sm">
-      {/* Section title */}
-      <Text className="text-lg font-bold text-neutral-900 dark:text-neutral-100 text-center">
+      {/* Title */}
+      <Text className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 text-left">
         Your QR Code
       </Text>
+
       {/* Subtitle */}
-      <Text className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 text-center">
+      <Text className="mt-1 text-lg text-black dark:text-neutral-400 text-left">
         Scan to connect
       </Text>
 
-      {/* QR visual wrapper */}
+      {/* Center the QR block */}
       <View className="mt-6 items-center">
-        <View className="p-4 bg-white dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-sm">
-          {/* Placeholder block if QR library not yet added */}
+        {/* Grey rounded background wrapper (like your screenshot) */}
+        <View className="bg-neutral-100 dark:bg-neutral-800 rounded-3xl p-10 shadow-sm">
+          {/* Exact-fit white square so its corners align 1:1 with the QR */}
           <View
-            // Fixed size container using passed size (h/w must match for square)
-            style={{ height: size, width: size }}
-            className="items-center justify-center bg-neutral-100 dark:bg-neutral-700 rounded-xl"
+            // Width/height must match the QR size exactly (no +1, no padding)
+            style={{ width: size, height: size }}
+            // White surface improves scan reliability; clip to remove any bleed
+            className="bg-white overflow-hidden rounded-none"
           >
-            <Text className="text-sm font-medium text-neutral-600 dark:text-neutral-300">
-              📱 QR Code
-            </Text>
-            <Text className="mt-2 max-w-[140px] text-xs text-center text-neutral-400 dark:text-neutral-400">
-              Scan with camera
-            </Text>
-          </View>
-
-          {/*
-            Real usage (uncomment when lib installed):
             <QRCode
-              value={qrValue}
+              // The encoded value
+              value={userId}
+              // Fill the white square exactly
               size={size}
+              // Transparent so the white square shows through
               backgroundColor="transparent"
-              color={isDark ? '#fff' : '#000'}
+              // Black modules on white are most scannable in both light/dark modes
+              color="#000000"
             />
-          */}
+          </View>
         </View>
       </View>
     </View>

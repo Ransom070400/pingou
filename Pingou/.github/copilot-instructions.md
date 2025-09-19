@@ -14,6 +14,7 @@ Do not use SafeAreaViews.
 I WANT TO LEARN THE INTERNALS OF REACT NATIVE SO PLEASE CONSIDER THAT WHEN EXPLAIN STUFF TO ME.
 Always use code output examples when explaining line of code you've written.
 Always account for dark mode and light mode when building components. 
+PLS DO NOT TRY TO ONE-SHOT EVERYTHING. IT WILL NOT IMPRESS ME. LET US IMPLEMENT FUNCTIONALITY, COMPONENTS ETC STEP BY STEP. I WANT TO LEARN. PRIORITIZE MY LEARNING ABOVE ALL ELSE. DO NOT SAY TO MUCHY SO YOU DO NOT WASTE TOKENS. 
  
 
  ALWAYS REFERENCE THE EXPO DOCS IF NECESSARY AT = https://docs.expo.dev/llms-full.txt

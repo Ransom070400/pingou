@@ -1,8 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, Linking } from 'react-native'
 
-import { Twitter, Instagram, Linkedin, Palette, Globe } from 'lucide-react-native'
-
 export interface SocialLink {
   // Stable unique id for key extraction
   id: string
@@ -15,6 +13,17 @@ export interface SocialLink {
 interface SocialLinksProps {
   // Pre-built list (kept dumb; parent handles building)
   links: SocialLink[]
+}
+
+// Cross‑platform shadow that resembles a raised button
+const cardShadow = {
+  // iOS shadow props
+  shadowColor: '#000',
+  shadowOpacity: 0.10,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  // Android elevation
+  elevation: 6
 }
 
 const SocialLinks: React.FC<SocialLinksProps> = ({ links }) => {
@@ -45,26 +54,43 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ links }) => {
         Social media
       </Text>
 
-      {/* List */}
-      <View className="space-y-3">
+      {/* List with vertical spacing between cards */}
+      <View
+        // Increase gap between card wrappers so their shadows don't visually merge.
+        // space-y-6 = 24px margin-top applied to every child except the first.
+        className="space-y-6"
+      >
         {links.map(link => (
-          <TouchableOpacity
-            key={link.id}
-            onPress={() => Linking.openURL(link.url)}
-            activeOpacity={0.7}
-            className="flex-row items-center gap-4 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-xl"
-          >
-            {/* Platform icon with color */}
-            <View className={`h-10 w-10 rounded-full ${getPlatformColor(link.label)} items-center justify-center`}>
-              <Text className="text-white font-bold text-lg">
-                {getPlatformIcon(link.label)}
-              </Text>
-            </View>
-            {/* Platform name */}
-            <Text className="flex-1 text-base font-medium text-neutral-800 dark:text-neutral-200">
-              {link.label}
-            </Text>
-          </TouchableOpacity>
+          // Wrapper adds the shadow; keep rounded so shadow matches shape
+          <View key={link.id} style={cardShadow} className="rounded-xl">
+            {/* Card content */}
+            <TouchableOpacity
+              onPress={() => Linking.openURL(link.url)}
+              activeOpacity={0.8}
+              // Card look: own background + padding + rounded corners
+              className="flex-row items-center gap-4 p-4 mb-2 bg-white dark:bg-neutral-800 rounded-xl"
+              accessibilityRole="link"
+              accessibilityLabel={`${link.label} link`}
+            >
+              {/* Platform icon with brand-like background */}
+              <View className={`h-10 w-10 rounded-full ${getPlatformColor(link.label)} items-center justify-center`}>
+                <Text className="text-white font-bold text-lg">
+                  {getPlatformIcon(link.label)}
+                </Text>
+              </View>
+
+              {/* Texts: label + muted URL preview */}
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                  {link.label}
+                </Text>
+                {/* numberOfLines truncates like your screenshot */}
+                <Text numberOfLines={1} className="text-sm text-neutral-500 dark:text-neutral-400">
+                  {link.url}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </View>
