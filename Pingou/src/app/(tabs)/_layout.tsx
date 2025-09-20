@@ -115,7 +115,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="connections"
+        name="(connections)"
         options={{
           title: 'Connections',
           headerShown:false,
