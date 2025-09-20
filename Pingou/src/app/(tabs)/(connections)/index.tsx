@@ -7,7 +7,7 @@ const connections = () => {
     <View className='flex-1 bg-white dark:bg-black'>
       <EmptyState
         title="No Connections yet"
-        description="Add your first connection or create a folder to organize them"
+        description="Scan another user's QR code to add a new connection"
       />
     </View>
   )

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pressable, Text, TouchableOpacity, View } from 'react-native'
+import { Pressable, Text, TouchableOpacity, View, Alert } from 'react-native'
 import { Plus } from 'lucide-react-native'
 
 type FabProps = {

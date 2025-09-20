@@ -4,7 +4,7 @@ import { router, Stack } from 'expo-router';
 import { useColorScheme, View, ActivityIndicator,Image } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from '../context/AuthProvider';
-
+import LoadingPenguins from '../components/LoadingPenguins';
 
 
 export const unstable_settings = {
@@ -27,20 +27,10 @@ function RootLayoutNav(){
     const colorScheme = useColorScheme();
           const { profile, session, loading } = useAuth();
          // If auth is loading, show a centered placeholder (simple splash)
-  if (loading) {
-    return (
-      // Full screen container centered for the placeholder.
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F3F4F6' }}>
-        {/* Optional logo image for splash; adjust path if needed. */}
-        <Image
-          source={require('../../assets/PingouLogoWOBG.png')}
-          style={{ width: 120, height: 160, marginBottom: 16 }}
-          resizeMode="contain"
-        />
-        {/* Native ActivityIndicator to show progress */}
-        <ActivityIndicator size="large" color="#111827" />
-      </View>
-    );
+
+         const load = true
+  if (load) { // loading
+    return <LoadingPenguins penguinSize={160} size={460} penguinSource={require('../../assets/PingouLogoWOBG.png')} />;
   }
       return (
 
