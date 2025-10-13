@@ -26,28 +26,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    // avoid updating state after unmount
-    let mounted = true;
-
-    // initialize session once on mount
-    const init = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session ?? null);
-    };
-    init();
-
-    // subscribe to auth state changes once
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    // cleanup: mark unmounted and unsubscribe listener
-    return () => {
-      mounted = false;
-      // unsubscribe the Supabase real-time listener safely
-      listener?.subscription?.unsubscribe();
-    };
+     //avoid updating state after unmount
+     let mounted = true
+     // initialize session once on mount
+     const init = async () => {
+       const { data } = await supabase.auth.getSession();
+       if (!mounted) return;
+       setSession(data.session ?? null);
+     };
+     init()
+     // subscribe to auth state changes once
+     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+       setSession(session);
+     })
+     // cleanup: mark unmounted and unsubscribe listener
+     return () => {
+       mounted = false;
+       // unsubscribe the Supabase real-time listener safely
+       listener?.subscription?.unsubscribe();
+     };
     // run only once on mount — this effect does not need to run when profile changes
   }, []); // <-- changed from [profile] to [] to avoid re-subscribing on profile updates
 
@@ -58,22 +55,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadProfile = async () => {
       setLoading(true);
       try {
-        if (session?.user?.id) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single();
-          if (!mounted) return;
-          if (error) {
-            // profile might not exist yet
-            setProfile(null);
-          } else {
-            setProfile(data ?? null);
-          }
-        } else {
-          setProfile(null);
-        }
+         if (session?.user?.id) {
+           const { data, error } = await supabase
+             .from('profiles')
+             .select('*')
+             .eq('user_id', session.user.id)
+             .single();
+           if (!mounted) return;
+           if (error) {
+             // profile might not exist yet
+             setProfile(null);
+           } else {
+             setProfile(data ?? null);
+           }
+         } else {
+           setProfile(null);
+         }
       } catch (err) {
         console.warn('Failed to load profile from Supabase', err);
         setProfile(null);

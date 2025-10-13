@@ -8,41 +8,46 @@ type LoadingPenguinsProps = {
   speedMs?: number
   label?: string
   rotateDirection?: 'cw' | 'ccw'
+  penguinTilt?: number // Add this new prop
   className?: string
   testID?: string
 }
 
 const LoadingPenguins: React.FC<LoadingPenguinsProps> = ({
   penguinSource,
-  size = 160,
-  penguinSize = 36,
+  size = 460,
+  penguinSize = 220,
   speedMs = 1500,
   label = 'Pingou',
   rotateDirection = 'cw',
+  penguinTilt = -15, // Default tilt of -15 degrees (negative = left tilt)
   className,
   testID = 'loading-penguins',
 }) => {
   const progress = useRef(new Animated.Value(0)).current
 
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: speedMs,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    )
-    loop.start()
-    return () => loop.stop()
-  }, [progress, speedMs])
+   useEffect(() => {
+     const loop = Animated.loop(
+       Animated.timing(progress, {
+         toValue: 1,
+         duration: speedMs,
+         easing: Easing.linear,
+         useNativeDriver: true,
+       })
+     )
+     loop.start()
+     return () => loop.stop()
+   }, [progress, speedMs])
+
+   
 
   const rotate = progress.interpolate({
     inputRange: [0, 1],
     outputRange: rotateDirection === 'cw' ? ['0deg', '360deg'] : ['0deg', '-360deg'],
   })
 
-  const radius = (size - penguinSize) / 2
+
+  const radius = ((size - penguinSize) / 2)
 
   const Penguin = ({
     translateX = 0,
@@ -114,18 +119,14 @@ const LoadingPenguins: React.FC<LoadingPenguinsProps> = ({
           style={{
             width: size,
             height: size,
-            borderRadius: size / 2,
-            position: 'absolute',
-            top: 0, left: 0,
-            transform: [{ rotate }],
-            zIndex: 0,
+            position: 'relative',
+            transform: [{ rotate: rotate }],
           }}
-          pointerEvents="none"
         >
-          <Penguin keyId="top" translateY={-radius} rotateDeg="0deg" />
-          <Penguin keyId="right" translateX={radius} rotateDeg="90deg" />
-          <Penguin keyId="bottom" translateY={radius} rotateDeg="180deg" />
-          <Penguin keyId="left" translateX={-radius} rotateDeg="270deg" />
+          <Penguin keyId="top"  translateY={-radius} rotateDeg={`${penguinTilt - 80}deg`} />
+          <Penguin keyId="right" translateX={radius} rotateDeg={`${penguinTilt + 10}deg`} />
+          <Penguin keyId="bottom" translateY={radius} rotateDeg={`${penguinTilt - 80}deg`} />
+          <Penguin keyId="left" translateX={-radius} rotateDeg={`${penguinTilt + 10}deg`} />
         </Animated.View>
       </View>
     </View>
