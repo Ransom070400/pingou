@@ -1,7 +1,7 @@
 import { Link, Tabs } from 'expo-router';
 import { User, QrCode, Users } from 'lucide-react-native';
 import { View, useColorScheme } from 'react-native';
-
+import { Feedback } from '~/src/utils/Feedback';
 import { HeaderButton } from '../../components/HeaderButton';
 
 export default function TabLayout() {
@@ -34,14 +34,16 @@ export default function TabLayout() {
           paddingVertical: 12, // More vertical padding for labels
           paddingHorizontal: 12, // Reduced horizontal padding to give more space for text
           borderRadius: 50, // Full pill shape
-          backgroundColor: colorScheme === 'dark'
-            ? 'rgba(40, 40, 40, 0.8)' // Darker, more opaque translucent for dark mode
-            : 'rgba(255, 255, 255, 0.75)', // Slightly more transparent for subtle glass effect
+          backgroundColor:
+            colorScheme === 'dark'
+              ? 'rgba(40, 40, 40, 0.8)' // Darker, more opaque translucent for dark mode
+              : 'rgba(255, 255, 255, 0.75)', // Slightly more transparent for subtle glass effect
           borderTopWidth: 0, // Removes default border
           borderWidth: 1, // Add subtle border
-          borderColor: colorScheme === 'dark'
-            ? 'rgba(255, 255, 255, 0.15)' // More visible light border for dark mode
-            : 'rgba(255, 255, 255, 0.2)', // Light border for light mode
+          borderColor:
+            colorScheme === 'dark'
+              ? 'rgba(255, 255, 255, 0.15)' // More visible light border for dark mode
+              : 'rgba(255, 255, 255, 0.2)', // Light border for light mode
           // Elevated floating shadow effect
           elevation: 20, // Strong Android shadow for floating effect
           shadowColor: '#000000', // iOS shadow
@@ -64,16 +66,15 @@ export default function TabLayout() {
       }}>
       <Tabs.Screen
         name="index"
+        listeners={{
+          tabPress: () => {
+            Feedback.medium();
+          },
+        }}
         options={{
           title: 'Profile',
-          headerShown:false,
-          tabBarIcon: ({ color }) => (
-            <User
-              color={color}
-              size={24}
-              strokeWidth={2}
-            />
-          ),
+          headerShown: false,
+          tabBarIcon: ({ color }) => <User color={color} size={24} strokeWidth={2} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <HeaderButton />
@@ -83,28 +84,34 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="scanner"
+        listeners={{
+          tabPress: () => {
+            Feedback.medium();
+          },
+        }}
         options={{
           title: 'Scan',
-          headerShown:false,
+          headerShown: false,
           tabBarIcon: () => (
-            <View style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#1F2937',
-              borderWidth: 4, // Add border width
-              borderColor: colorScheme === 'dark' ? '#FFFFFF' : '#1F2937', // Border color - white for both modes
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: -45, // More elevated - pushes it higher above the tab bar
-              padding: 16, // Added internal padding for more space around the icon
-              // Subtle shadow for scan icon
-              elevation: 6, // Reduced Android shadow
-              shadowColor: '#000000', // iOS shadow
-              shadowOpacity: 0.15, // Much lighter shadow
-              shadowRadius: 4, // Smaller blur
-              shadowOffset: { width: 0, height: 2 }, // Minimal offset
-            }}>
+            <View
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 40,
+                backgroundColor: colorScheme === 'dark' ? '#1F2937' : '#1F2937',
+                borderWidth: 4, // Add border width
+                borderColor: colorScheme === 'dark' ? '#FFFFFF' : '#1F2937', // Border color - white for both modes
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: -45, // More elevated - pushes it higher above the tab bar
+                padding: 16, // Added internal padding for more space around the icon
+                // Subtle shadow for scan icon
+                elevation: 6, // Reduced Android shadow
+                shadowColor: '#000000', // iOS shadow
+                shadowOpacity: 0.15, // Much lighter shadow
+                shadowRadius: 4, // Smaller blur
+                shadowOffset: { width: 0, height: 2 }, // Minimal offset
+              }}>
               <QrCode
                 color={colorScheme === 'dark' ? '#FFFFFF' : '#FFFFFF'} // Inverted icon color
                 size={30}
@@ -116,16 +123,15 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="(connections)"
+        listeners={{
+          tabPress: () => {
+            Feedback.medium();
+          },
+        }}
         options={{
           title: 'Connections',
-          headerShown:false,
-          tabBarIcon: ({ color }) => (
-            <Users
-              color={color}
-              size={24}
-              strokeWidth={2}
-            />
-          ),
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Users color={color} size={24} strokeWidth={2} />,
         }}
       />
     </Tabs>
