@@ -6,7 +6,6 @@ import { Mail, Lock, SquareCheckIcon } from 'lucide-react-native'
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { handleLoginUtil, handleLoginWithAppleAuthUtil } from '~/src/utils/signInUtils';
 import { router } from 'expo-router';
-import { TextReveal } from '~/src/components/TextReveal';
 
 /**
  * Main SignIn screen component.
@@ -47,8 +46,7 @@ export default function SignIn() {
 
       {/* Heading section */}
       <View className="items-center mb-6">
-        {/* <Text className="text-2xl font-bold text-neutral-900">Welcome back</Text> */}
-        <TextReveal text="Welcome back" fontSize={28} fontWeight="700" duration={1500} trigger={true} />
+        <Text className="text-2xl font-bold text-neutral-900">Welcome back</Text>
         <Text className="text-sm text-neutral-500 mt-1">Your Networking companion</Text>
       </View>
 
