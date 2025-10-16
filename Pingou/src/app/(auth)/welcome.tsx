@@ -23,9 +23,18 @@ const onboardingCards = [
   }
 ]
 
+
+
 const Onboarding = () => {
   const [remainingCards, setRemainingCards] = useState(onboardingCards)
   const currentCardIndex = onboardingCards.length - remainingCards.length
+
+  // Jump straight to the final card (keeps onboarding in-memory)
+ const goToLastCard = () => {
+   const lastCard = onboardingCards[onboardingCards.length - 1]
+   setRemainingCards([lastCard])
+ }
+
   return (
     // Main container - keeps big images visible outside bounds
     <View className='flex-1 bg-gray-100'>
@@ -113,7 +122,7 @@ const Onboarding = () => {
         </View>
 
         <View className='flex-row justify-between items-center'>
-          <TouchableOpacity className='px-6 py-3 border p-7 rounded-full border-gray-300'>
+          <TouchableOpacity className='px-6 py-3 border p-7 rounded-full border-gray-300' onPress={goToLastCard}>
             <Text className='text-black font-medium'>Skip</Text>
           </TouchableOpacity>
 

@@ -6,7 +6,7 @@ import { Mail, Lock, SquareCheckIcon } from 'lucide-react-native'
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { handleLoginUtil, handleLoginWithAppleAuthUtil } from '~/src/utils/signInUtils';
 import { router } from 'expo-router';
-
+import { TextReveal } from '~/src/components/TextReveal';
 
 /**
  * Main SignIn screen component.
@@ -47,7 +47,8 @@ export default function SignIn() {
 
       {/* Heading section */}
       <View className="items-center mb-6">
-        <Text className="text-2xl font-semibold text-neutral-900">Welcome back!</Text>
+        {/* <Text className="text-2xl font-bold text-neutral-900">Welcome back</Text> */}
+        <TextReveal text="Welcome back" fontSize={28} fontWeight="700" duration={1500} trigger={true} />
         <Text className="text-sm text-neutral-500 mt-1">Your Networking companion</Text>
       </View>
 
@@ -62,29 +63,29 @@ export default function SignIn() {
         {/* Center children horizontally since this is a row (main axis = horizontal). */}
         <View className="flex-row items-center justify-center mb-5">
           {/* NEW: Apple sign-in rendered inside form so it fits with layout */}
-            {isIOS && (
-              <View className='items-center' >
-                <AppleAuthentication.AppleAuthenticationButton
-                  buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                  buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                  cornerRadius={20}
-                  style={styles.button}
+          {isIOS && (
+            <View className='items-center' >
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={20}
+                style={styles.button}
 
-                 onPress={async () => {
+                onPress={async () => {
                   const { success, error } = await handleLoginWithAppleAuthUtil();
                   console.log(success)
-                  if (success){
+                  if (success) {
                     router.replace("/(tabs)")
                   } else {
                     Alert.alert("Login Error", error.message);
                   }
-                 }} 
-                />
-              </View>
-            )}
-          
+                }}
+              />
+            </View>
+          )}
+
         </View>
-        
+
 
         {/* Separator line with OR */}
         <View className="flex-row items-center mb-5">
@@ -122,7 +123,7 @@ export default function SignIn() {
         {/* Second input below the email (e.g., password) */}
         <View className="flex-row items-center h-12 rounded-full border border-neutral-300 px-4 mb-4 bg-white">
           {/* If you want an icon for this field add it here (e.g., lock). Left empty for now. */}
-            <Lock color="gray" size={20} style={{ marginRight: 8 }} />
+          <Lock color="gray" size={20} style={{ marginRight: 8 }} />
           {/* Password TextInput below the email; secureTextEntry hides input. */}
           <TextInput
             // Basic text input styling
@@ -148,13 +149,14 @@ export default function SignIn() {
           className="h-12 rounded-full  bg-black items-center justify-center flex-row active:opacity-90"
           onPress={handleLogin}
         >
-          <Text className="text-white font-semibold mr-3 text-sm">Login</Text>
+          <Text className="text-white font-semibold mr-3 text-sm">{loading ? "Logging in" : "Login"}</Text>
           {/* Simple arrow placeholder; swap for icon later */}
-         <View className='bg-white rounded-full  w-8 h-8 justify-center items-center'>
-                      <Text className='text-black  self-center'>→</Text>
+          <View className='bg-white rounded-full  w-8 h-8 justify-center items-center'>
+            <Text className='text-black  self-center'>→</Text>
           </View>
         </TouchableOpacity>
       </View>
+
 
       {/* Footer link */}
       <View className="items-center mt-6">

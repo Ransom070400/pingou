@@ -2,6 +2,8 @@ import { View, Text, Image, TouchableOpacity, useColorScheme } from 'react-nativ
 import { Camera, Edit, PencilIcon } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
+import { supabase } from '~/src/lib/supabase';
+import { router } from 'expo-router';
 
 type Props = {
   fullName: string;
@@ -18,7 +20,6 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
   const editIconColor = colorScheme === 'dark' ? '#fff' : '#000';
   const [imageUri, setImageUri] = useState<string | null>(null);
 
-
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -31,7 +32,6 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
       setImageUri(result.assets[0].uri);
     }
   };
-
 
   // Create a cross-platform shadow style for the Edit button.
   // Using elevation for Android and shadow* properties for iOS.
@@ -59,7 +59,6 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
       <View className="relative h-32 w-32">
         {/* Avatar wrapper - larger size to match design */}
         <View className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gradient-to-br from-orange-400 to-yellow-500 shadow-lg">
-
           {/* //TO-DO: Remember to change it to avatarUrl */}
           {imageUri ? (
             <View>
@@ -77,7 +76,7 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
           )}
         </View>
 
-        {/* 
+        {/*
           Positioned badge: use absolute positioning relative to the avatar container.
           We offset it slightly outside the right edge (right: -12) and vertically center it
           using top: '50%' and translateY: -20 (half of badge height = 20).
@@ -111,7 +110,7 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
       {/* Edit profile button - Replaced inline icon inside Text with a horizontal row
           so we can control spacing between the label and the icon. */}
       <TouchableOpacity
-        onPress={() => {}}
+        onPress={() => router.push("/editProfile")}
         className="mt-4 rounded-full bg-white p-2 px-6 py-2 dark:bg-neutral-100"
         // Apply the computed cross-platform shadow style via style prop.
         style={buttonShadowStyle}

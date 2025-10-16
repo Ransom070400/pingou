@@ -13,6 +13,7 @@ import ProfileQRCode from '~/src/components/profile/ProfileQRCode'
 // Types + helper
 import { ProfileType } from '~/src/types/ProfileTypes'
 import { buildSocialLinks } from '~/src/utils/buildSocialLinks'
+import { Paragraph } from '@shopify/react-native-skia'
 
 // Mock profile data (replace later with Supabase fetch)
 const mockProfile: ProfileType = {
@@ -72,6 +73,8 @@ const Index: React.FC = () => {
         <View className="mt-6">
           <ContactInfo email={mockProfile.email} phone={mockProfile.phone} />
         </View>
+
+
 
         {/* Socials */}
         <View className="mt-6 mb-8">

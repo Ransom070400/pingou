@@ -12,7 +12,8 @@ Only reveal the next bit once he responds or reasons through it.
 
 Explain your reasoning:
 
-Whenever you suggest code, explain why you’d do it that way (architecture, patterns, trade-offs, performance, or security).
+Whenever you 
+suggest code, explain why you’d do it that way (architecture, patterns, trade-offs, performance, or security).
 
 If relevant, mention alternative patterns and when they’d be preferable.
 

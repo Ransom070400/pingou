@@ -36,10 +36,12 @@ export default function SignUp() {
   // NOTE: Sign up functionality removed per request.
 
   const handleSignUp = async () => {
+    setLoading(true);
     if (password !== confirmPassword) Alert.alert('Easy there!', 'Passwords do not match');
     const { success, error } = await handleUserSignUp(email, password);
     if (error) Alert.alert('Sign up error', error.message);
     if (success) router.replace('/(auth)/onboarding');
+    setLoading(false);
   };
   // You (the user) will implement the registration logic/util and hook it here.
 
@@ -164,7 +166,7 @@ export default function SignUp() {
       {/* Footer link to Sign In */}
       <View className="mt-6 items-center">
         <Text onPress={() => router.replace('/(auth)/signin')} className="text-xs text-neutral-600">
-          Already have an account? <Text className="text-amber-600">Sign in</Text>
+          Already have an account? <Text className="text-amber-600">{loading ? "Signing in..." : "Sign in"}</Text>
         </Text>
       </View>
     </View>
