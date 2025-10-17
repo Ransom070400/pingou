@@ -41,9 +41,9 @@ function RootLayoutNav() {
           </Stack.Protected>
           <Stack.Protected guard={!!session}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name='editProfile' options={{ headerShown: false, presentation: "modal" }} />
+            <Stack.Screen name='editProfile' options={{ title: "Edit Profile", presentation: "modal", headerTransparent: true}} />
           </Stack.Protected>
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="modal" options={{ headerShown: false, presentation: "modal" }} />
         </Stack>
       </ThemeProvider>
     </GestureHandlerRootView>

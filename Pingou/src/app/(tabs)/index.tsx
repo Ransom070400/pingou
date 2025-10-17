@@ -1,7 +1,8 @@
-import React, { useMemo,useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
+import React, { useMemo } from 'react'
+import { View, ScrollView, TouchableOpacity, useColorScheme, Alert } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LogOut } from 'lucide-react-native'
 import { supabase } from '~/src/lib/supabase'
-
 
 // Child components
 import ProfileHeader from '~/src/components/profile/ProfileHeader'
@@ -10,12 +11,11 @@ import ContactInfo from '~/src/components/profile/ContactInfo'
 import SocialLinks from '~/src/components/profile/SocialLinks'
 import ProfileQRCode from '~/src/components/profile/ProfileQRCode'
 
+
 // Types + helper
 import { ProfileType } from '~/src/types/ProfileTypes'
 import { buildSocialLinks } from '~/src/utils/buildSocialLinks'
-import { Paragraph } from '@shopify/react-native-skia'
 
-// Mock profile data (replace later with Supabase fetch)
 const mockProfile: ProfileType = {
   user_id: 'uuid-123',
   email: 'daveydenco@gmail.com',
@@ -31,34 +31,57 @@ const mockProfile: ProfileType = {
 }
 
 const Index: React.FC = () => {
-  // Memoize built social links so they are not rebuilt on unrelated re-renders.
+  const insets = useSafeAreaInsets()
+  const colorScheme = useColorScheme()
+  const iconColor = colorScheme === 'dark' ? '#ffffff' : '#111827'
+
   const socialList = useMemo(() => buildSocialLinks(mockProfile), [])
- 
-  
+
+
+  const handleLogout = async () => {
+    Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel"
+      },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            Alert.alert("Logout Error", error.message);
+          }
+        }
+      }
+    ])
+  }
 
   return (
     <View className="flex-1 bg-neutral-100 dark:bg-neutral-900">
+      {/* Pinned logout icon (doesn't push content) */}
+      <View style={{ position: 'absolute', top: insets.top + 8, right: 16, zIndex: 10 }}>
+        <TouchableOpacity
+          onPress={handleLogout}
+          accessibilityRole="button"
+          accessibilityLabel="Sign out"
+          activeOpacity={0.6}
+          className="h-9 w-9 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-800"
+        >
+          <LogOut size={18} color={iconColor} strokeWidth={2} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 48 }}
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 90 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* //Sign out button */}
-        {/* <TouchableOpacity
-          onPress={() => supabase.auth.signOut()}
-          className="self-end m-4 px-4 py-2 rounded-full bg-neutral-900 dark:bg-neutral-100"
-          activeOpacity={0.6}
-        >
-          <Text className="text-sm font-medium text-white dark:text-black">
-            Sign Out
-          </Text>
-        </TouchableOpacity> */}
-
         {/* Header */}
         <ProfileHeader
           fullName={mockProfile.fullname}
           tagline="I write production code"
-          avatarUrl={mockProfile.profile_url} // Pass the selected image URI as avatarUrl}
+          avatarUrl={mockProfile.profile_url}
         />
 
         {/* Stats */}
@@ -73,8 +96,6 @@ const Index: React.FC = () => {
         <View className="mt-6">
           <ContactInfo email={mockProfile.email} phone={mockProfile.phone} />
         </View>
-
-
 
         {/* Socials */}
         <View className="mt-6 mb-8">
