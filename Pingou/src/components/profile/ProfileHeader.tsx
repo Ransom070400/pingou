@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { supabase } from '~/src/lib/supabase';
 import { router } from 'expo-router';
+import { Feedback } from '~/src/utils/Feedback';
 
 type Props = {
   fullName: string;
@@ -110,7 +111,10 @@ const ProfileHeader = ({ fullName, tagline, avatarUrl }: Props) => {
       {/* Edit profile button - Replaced inline icon inside Text with a horizontal row
           so we can control spacing between the label and the icon. */}
       <TouchableOpacity
-        onPress={() => router.push("/editProfile")}
+        onPress={() => {
+          Feedback.medium();
+          router.push('/editProfile');
+        }}
         className="mt-4 rounded-full bg-white p-2 px-6 py-2 dark:bg-neutral-100"
         // Apply the computed cross-platform shadow style via style prop.
         style={buttonShadowStyle}
