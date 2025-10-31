@@ -39,11 +39,13 @@ export default function EditProfile() {
 
       <ScrollView
         className="flex-1 overflow-hidden"
-        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: Math.max(insets.bottom, 16) }}
+        contentContainerStyle={{
+          paddingTop: insets.top + 8,
+          paddingBottom: Math.max(insets.bottom, 16),
+        }}
         contentInsetAdjustmentBehavior="never" // prevent auto top/bottom gaps
         scrollIndicatorInsets={{ top: insets.top, bottom: insets.bottom }}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         <SectionCard title="About you">
           <FieldLabel text="Your name" />
           <PlaceholderInput />
@@ -85,4 +87,3 @@ export default function EditProfile() {
     </View>
   );
 }
-

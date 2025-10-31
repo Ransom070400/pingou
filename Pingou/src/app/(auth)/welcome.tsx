@@ -1,8 +1,10 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import OnboardingCard from '../../components/OnboardingCard'
 import { router } from 'expo-router'
 import WelcomeCards from '~/src/components/WelcomeCards'
+import { Redirect } from 'expo-router'
+
 
 // Card metadata array
 const onboardingCards = [
@@ -22,6 +24,9 @@ const onboardingCards = [
     tiltDegrees: 3 // Clockwise
   }
 ]
+
+
+
 
 
 

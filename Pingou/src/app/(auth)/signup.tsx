@@ -39,7 +39,12 @@ export default function SignUp() {
     setLoading(true);
     if (password !== confirmPassword) Alert.alert('Easy there!', 'Passwords do not match');
     const { success, error } = await handleUserSignUp(email, password);
-    if (error) Alert.alert('Sign up error', error.message);
+    if (error && !success){
+      Alert.alert('Sign up error', error.message);
+      setLoading(false);
+      console.log(error.message); 
+      return;
+    }
     if (success) router.replace('/(auth)/onboarding');
     setLoading(false);
   };

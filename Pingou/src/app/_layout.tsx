@@ -36,10 +36,10 @@ function RootLayoutNav() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Protected guard={!session}>
+          <Stack.Protected guard={!session || !profile}>
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           </Stack.Protected>
-          <Stack.Protected guard={!!session}>
+          <Stack.Protected guard={!!session && !!profile}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name='editProfile' options={{ title: "Edit Profile", presentation: "modal", headerTransparent: true}} />
           </Stack.Protected>

@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
          }
       } catch (err) {
         console.warn('Failed to load profile from Supabase', err);
-        setProfile(null);
+      setProfile(null);
       } finally {
         // ensure loading false only if component still mounted
         if (mounted) setLoading(false);
