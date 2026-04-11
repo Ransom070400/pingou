@@ -11,71 +11,76 @@ const AuthContext = createContext<{
 }>({
   profile: null,
   setProfile: () => {},
-  loading: false,
+  loading: true,
   session: null,
 } as any);
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // current user profile
   const [profile, setProfile] = useState<ProfileType | null>(null);
-  // loading flag used while fetching profile data
-  const [loading, setLoading] = useState(false);
-  // auth session from Supabase
+  const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
-  useEffect(() => {
-     //avoid updating state after unmount
-     let mounted = true
-     // initialize session once on mount
-     const init = async () => {
-       const { data } = await supabase.auth.getSession();
-       if (!mounted) return;
-       setSession(data.session ?? null);
-     };
-     init()
-     // subscribe to auth state changes once
-     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-       setSession(session);
-     })
-     // cleanup: mark unmounted and unsubscribe listener
-     return () => {
-       mounted = false;
-       // unsubscribe the Supabase real-time listener safely
-       listener?.subscription?.unsubscribe();
-     };
-    // run only once on mount — this effect does not need to run when profile changes
-  }, []); // <-- changed from [profile] to [] to avoid re-subscribing on profile updates
-
+  // 1. Initialize session + subscribe to auth changes
   useEffect(() => {
     let mounted = true;
 
+    const init = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (mounted) {
+          setSession(data.session ?? null);
+        }
+      } catch (err) {
+        console.warn('Failed to get session:', err);
+        if (mounted) setSession(null);
+      } finally {
+        if (mounted) setInitialized(true);
+      }
+    };
+    init();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (mounted) setSession(sess);
+    });
+
+    return () => {
+      mounted = false;
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  // 2. Fetch profile once initialized and whenever session changes
+  useEffect(() => {
+    if (!initialized) return;
+
+    let mounted = true;
 
     const loadProfile = async () => {
       setLoading(true);
       try {
-         if (session?.user?.id) {
-           const { data, error } = await supabase
-             .from('profiles')
-             .select('*')
-             .eq('user_id', session.user.id)
-             .single();
-           if (!mounted) return;
-           if (error) {
-             // profile might not exist yet
-             setProfile(null);
-           } else {
-             setProfile(data ?? null);
-           }
-         } else {
-           setProfile(null);
-         }
+        if (session?.user?.id) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (!mounted) return;
+          if (error) {
+            setProfile(null);
+          } else {
+            setProfile(data ?? null);
+          }
+        } else {
+          if (mounted) setProfile(null);
+        }
       } catch (err) {
-        console.warn('Failed to load profile from Supabase', err);
-      setProfile(null);
+        console.warn('Failed to load profile:', err);
+        if (mounted) setProfile(null);
       } finally {
-        // ensure loading false only if component still mounted
         if (mounted) setLoading(false);
       }
     };
@@ -85,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       mounted = false;
     };
-  }, [session]);
+  }, [session, initialized]);
 
   return (
     <AuthContext.Provider value={{ profile, setProfile, loading, session }}>

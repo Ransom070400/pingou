@@ -3,6 +3,7 @@ import { View, ScrollView, TouchableOpacity, useColorScheme, Alert } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LogOut } from 'lucide-react-native';
 import { supabase } from '~/src/lib/supabase';
+import { useAuth } from '~/src/context/AuthProvider';
 
 // Child components
 import ProfileHeader from '~/src/components/profile/ProfileHeader';
@@ -11,53 +12,39 @@ import ContactInfo from '~/src/components/profile/ContactInfo';
 import SocialLinks from '~/src/components/profile/SocialLinks';
 import ProfileQRCode from '~/src/components/profile/ProfileQRCode';
 
-// Types + helper
-import { ProfileType } from '~/src/types/ProfileTypes';
+// Helper
 import { buildSocialLinks } from '~/src/utils/buildSocialLinks';
-
-const mockProfile: ProfileType = {
-  user_id: 'uuid-123',
-  email: 'daveydenco@gmail.com',
-  nickname: 'davey',
-  fullname: 'Davey Eke',
-  instagram: 'instagram.com/username',
-  twitter: 'x.com/formerly_twitter',
-  linkedin: 'linkedin.com/daveyeke',
-  phone: '08123456789',
-  extras: ['behance.net/daveyeke'],
-  created_at: '2025-09-16T00:00:00Z',
-  updated_at: '2025-09-16T00:00:00Z',
-};
 
 const Index: React.FC = () => {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === 'dark' ? '#ffffff' : '#111827';
+  const { profile } = useAuth();
 
-  const socialList = useMemo(() => buildSocialLinks(mockProfile), []);
+  const socialList = useMemo(
+    () => (profile ? buildSocialLinks(profile) : []),
+    [profile]
+  );
 
   const handleLogout = async () => {
     Alert.alert('Confirm Logout', 'Are you sure you want to log out?', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
+      { text: 'Cancel', style: 'cancel' },
       {
         text: 'Log Out',
         style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.auth.signOut();
-          if (error) {
-            Alert.alert('Logout Error', error.message);
-          }
+          if (error) Alert.alert('Logout Error', error.message);
         },
       },
     ]);
   };
 
+  if (!profile) return null;
+
   return (
     <View className="flex-1 bg-neutral-100 dark:bg-neutral-900">
-      {/* Pinned logout icon (doesn't push content) */}
+      {/* Logout button */}
       <View style={{ position: 'absolute', top: insets.top + 8, right: 16, zIndex: 10 }}>
         <TouchableOpacity
           onPress={handleLogout}
@@ -75,22 +62,22 @@ const Index: React.FC = () => {
         showsVerticalScrollIndicator={false}>
         {/* Header */}
         <ProfileHeader
-          fullName={mockProfile.fullname}
-          tagline="I write production code"
-          avatarUrl={mockProfile.profile_url}
+          fullName={profile.fullname}
+          tagline={profile.nickname}
+          avatarUrl={profile.profile_url}
         />
 
         {/* Stats */}
-        <StatsCard pingTokens={0} connections={10} />
+        <StatsCard pingTokens={0} connections={0} />
 
         {/* QR Code */}
         <View className="mt-8">
-          <ProfileQRCode userId={mockProfile.user_id} />
+          <ProfileQRCode userId={profile.user_id} />
         </View>
 
         {/* Contact */}
         <View className="mt-6">
-          <ContactInfo email={mockProfile.email} phone={mockProfile.phone} />
+          <ContactInfo email={profile.email} phone={profile.phone} />
         </View>
 
         {/* Socials */}

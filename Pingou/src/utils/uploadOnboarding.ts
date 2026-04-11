@@ -1,52 +1,52 @@
-import { supabase } from '~/src/lib/supabase';
+import { supabase } from '../lib/supabase';
 import { ProfilePayload } from '~/types/types';
-
+import { ProfileType } from '../types/ProfileTypes';
+import { uploadProfilePicture } from './uploadProfilePicture';
 
 /**
- * Uploads the onboarding profile data to Supabase
- * Creates the user profile for the first time during onboarding
- * @param payload -  The payload we are uploading
- * @returns Promise with the upload result
+ * Creates a new profile in the `profiles` table after onboarding.
+ * Uploads the profile picture if provided.
+ * Returns the created profile or null on failure.
  */
 export const uploadOnboarding = async (
-  payload: ProfilePayload,
-): Promise<{ success: boolean; error?: string; data?: any }> => {
+  payload: ProfilePayload
+): Promise<{ profile: ProfileType | null; error: any }> => {
   try {
-    // 1. Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {   
-      throw new Error('User not authenticated');
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) {
+      return { profile: null, error: userError ?? new Error('No authenticated user') };
     }
 
-    // 3. Insert profile data to database (first time creation during onboarding)
-    const { data, error: dbError } = await supabase
+    const user = userData.user;
+    let profileUrl: string | null = null;
+
+    // Upload profile picture if provided
+    if (payload.imageUri) {
+      profileUrl = await uploadProfilePicture(payload.imageUri, user.id);
+    }
+
+    const profileRow = {
+      user_id: user.id,
+      email: user.email ?? '',
+      fullname: payload.name ?? '',
+      nickname: payload.name?.split(' ')[0]?.toLowerCase() ?? '',
+      phone: payload.phone ?? null,
+      instagram: payload.instagram ?? null,
+      twitter: payload.x ?? null, // SocialsCard uses 'x', DB stores as 'twitter'
+      linkedin: payload.linkedin ?? null,
+      extras: payload.extras ?? [],
+      profile_url: profileUrl,
+    };
+
+    const { data, error } = await supabase
       .from('profiles')
-      .insert({
-        user_id: user.id,
-        display_name: payload.name,
-        bio: payload.bio,
-        phone: payload.phone,
-        instagram: payload.instagram,
-        twitter: payload.x,
-        linkedin: payload.linkedin,
-        extras: payload.extras || [],
-        image_uri: payload.imageUri || null,
-      })
+      .insert(profileRow)
       .select()
       .single();
 
-    if (dbError) {
-      console.error('Database error:', dbError);
-      throw new Error(`Failed to save profile: ${dbError.message}`);
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error uploading onboarding data:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
+    if (error) return { profile: null, error };
+    return { profile: data, error: null };
+  } catch (err) {
+    return { profile: null, error: err };
   }
 };

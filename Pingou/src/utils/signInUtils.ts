@@ -1,65 +1,48 @@
-import { supabase } from "../lib/supabase";
+import { supabase } from '../lib/supabase';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { LoginReturnType } from "../types/AuthTypes";
 
+interface AuthResult {
+  success: boolean;
+  error: any;
+}
 
+export const handleLoginUtil = async (
+  email: string,
+  password: string
+): Promise<AuthResult> => {
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { success: false, error };
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err };
+  }
+};
 
-
-/**
- * Function to sign in with supabase auth 
- */
-export const handleLoginUtil = async (email: string, password: string) : Promise<LoginReturnType> => {
-    if (!email.trim() || !password) return { error: new Error("Invalid input"), success: false };
-     const { data: signInData, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
+export const handleLoginWithAppleAuthUtil = async (): Promise<AuthResult> => {
+  try {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
     });
 
-    if (signInError){
-       return {
-        error: signInError!,
-        success: false
-    };
+    if (!credential.identityToken) {
+      return { success: false, error: new Error('No identity token from Apple') };
     }
-    return {
-        error: new Error(""),
-        success: true
-    };
-}
 
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'apple',
+      token: credential.identityToken,
+    });
 
-export const handleLoginWithAppleAuthUtil = async (): Promise<LoginReturnType> => {
-     const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-
-
-      if (!credential.identityToken) throw new Error('No identityToken.');
-
-      const {
-        error: appleError,
-        data: { user },
-      } = await supabase.auth.signInWithIdToken({
-        provider: 'apple',
-        token: credential.identityToken,
-      });
-
-
-
-      if (appleError) {
-      return {
-        error: appleError!,
-        success: false
-    };
-      }
-
-      return {
-        error: new Error(""),
-        success: true
-    };
-
-}
+    if (error) return { success: false, error };
+    return { success: true, error: null };
+  } catch (err: any) {
+    if (err.code === 'ERR_REQUEST_CANCELED') {
+      return { success: false, error: new Error('Apple sign-in was cancelled') };
+    }
+    return { success: false, error: err };
+  }
+};

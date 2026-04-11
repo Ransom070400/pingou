@@ -1,13 +1,12 @@
 import '../../global.css';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { router, Stack } from 'expo-router';
-import { useColorScheme, View, ActivityIndicator, Image } from 'react-native';
+import { Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from '../context/AuthProvider';
 import LoadingPenguins from '../components/LoadingPenguins';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
@@ -22,6 +21,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { profile, session, loading } = useAuth();
+
   if (loading) {
     return (
       <LoadingPenguins
@@ -42,6 +42,7 @@ function RootLayoutNav() {
           <Stack.Protected guard={!!session && !!profile}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name='editProfile' options={{ title: "Edit Profile", presentation: "modal", headerTransparent: true}} />
+            <Stack.Screen name='connectionDetail' options={{ headerShown: false, presentation: "modal" }} />
           </Stack.Protected>
           <Stack.Screen name="modal" options={{ headerShown: false, presentation: "modal" }} />
         </Stack>

@@ -42,7 +42,7 @@ const Onboarding = () => {
 
   return (
     // Main container - keeps big images visible outside bounds
-    <View className='flex-1 bg-gray-100'>
+    <View className='flex-1 bg-gray-100 dark:bg-neutral-900'>
 
       {/* Top right penguin (bigger). Rotate anticlockwise from top so bottom is cut off */}
       <Image
@@ -127,12 +127,12 @@ const Onboarding = () => {
         </View>
 
         <View className='flex-row justify-between items-center'>
-          <TouchableOpacity className='px-6 py-3 border p-7 rounded-full border-gray-300' onPress={goToLastCard}>
-            <Text className='text-black font-medium'>Skip</Text>
+          <TouchableOpacity className='px-6 py-3 border p-7 rounded-full border-gray-300 dark:border-neutral-600' onPress={goToLastCard}>
+            <Text className='text-black dark:text-white font-medium'>Skip</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            className='bg-gray-800 px-8 py-3 rounded-full flex-row items-center'
+          <TouchableOpacity
+            className='bg-gray-800 dark:bg-white px-8 py-3 rounded-full flex-row items-center'
             onPress={() => {
               if (remainingCards.length > 1) {
                 // Remove the top card from the stack
@@ -144,11 +144,11 @@ const Onboarding = () => {
               }
             }}
           >
-            <Text className='text-white font-medium mr-2'>
+            <Text className='text-white dark:text-black font-medium mr-2'>
               {remainingCards.length === 1 ? 'Get Started' : 'Next'}
             </Text>
-            <View className='bg-white rounded-full w-8 h-8 justify-center items-center'>
-              <Text className='text-black self-center'>→</Text>
+            <View className='bg-white dark:bg-black rounded-full w-8 h-8 justify-center items-center'>
+              <Text className='text-black dark:text-white self-center'>→</Text>
             </View>
           </TouchableOpacity>
         </View>

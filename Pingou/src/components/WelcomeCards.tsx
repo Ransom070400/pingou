@@ -5,21 +5,21 @@ interface OnboardingCardProps {
   title: string
   description: string
   className?: string
-  tiltDegrees?: number // Positive for clockwise, negative for anticlockwise
+  tiltDegrees?: number
 }
 
-const  WelcomeCards = ({ title, description, className = '', tiltDegrees = 0 }: OnboardingCardProps) => {
+const WelcomeCards = ({ title, description, className = '', tiltDegrees = 0 }: OnboardingCardProps) => {
   return (
-    <View 
-      className={`bg-white rounded-3xl p-8 mx-4 shadow-lg ${className}`}
+    <View
+      className={`bg-white dark:bg-neutral-800 rounded-3xl p-8 mx-4 shadow-lg ${className}`}
       style={{
         transform: tiltDegrees !== 0 ? [{ rotate: `${tiltDegrees}deg` }] : undefined
       }}
     >
-      <Text className='text-2xl font-bold text-center text-gray-800 mb-4'>
+      <Text className='text-2xl font-bold text-center text-gray-800 dark:text-white mb-4'>
         {title}
       </Text>
-      <Text className='text-gray-600 text-center leading-6'>
+      <Text className='text-gray-600 dark:text-neutral-400 text-center leading-6'>
         {description}
       </Text>
     </View>

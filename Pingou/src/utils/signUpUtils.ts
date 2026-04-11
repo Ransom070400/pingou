@@ -1,11 +1,19 @@
 import { supabase } from '../lib/supabase';
-import { LoginReturnType } from '../types/AuthTypes';
 
-export const handleUserSignUp = async (email: string, password: string): Promise<LoginReturnType> => {
-  if (!email.trim() || !password) return { error: new Error('Invalid input'), success: false };
+interface AuthResult {
+  success: boolean;
+  error: any;
+}
 
-  const { error } = await supabase.auth.signUp({ email, password });
-
-  if (error) return { error, success: false };
-  return { error: new Error(''), success: true };
+export const handleUserSignUp = async (
+  email: string,
+  password: string
+): Promise<AuthResult> => {
+  try {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) return { success: false, error };
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: err };
+  }
 };
