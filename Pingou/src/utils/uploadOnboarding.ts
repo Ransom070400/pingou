@@ -20,21 +20,21 @@ export const uploadOnboarding = async (
     const user = userData.user;
     let profileUrl: string | null = null;
 
-    // Upload profile picture if provided
     if (payload.imageUri) {
       profileUrl = await uploadProfilePicture(payload.imageUri, user.id);
     }
+
+    // Extract phone from socials if present
+    const phone = payload.socials?.phone ?? null;
 
     const profileRow = {
       user_id: user.id,
       email: user.email ?? '',
       fullname: payload.name ?? '',
       nickname: payload.name?.split(' ')[0]?.toLowerCase() ?? '',
-      phone: payload.phone ?? null,
-      instagram: payload.instagram ?? null,
-      twitter: payload.x ?? null, // SocialsCard uses 'x', DB stores as 'twitter'
-      linkedin: payload.linkedin ?? null,
-      extras: payload.extras ?? [],
+      bio: payload.bio ?? '',
+      phone,
+      socials: payload.socials ?? {},
       profile_url: profileUrl,
     };
 

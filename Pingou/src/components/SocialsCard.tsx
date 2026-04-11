@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
+import { Check } from 'lucide-react-native';
 import OnboardingCard from './OnboardingCard';
-import Field from './SocialCardField';
-
-export type SocialValues = {
-  phone?: string;
-  instagram?: string;
-  x?: string;
-  linkedin?: string;
-  extras?: string[];
-};
+import { SOCIAL_PLATFORMS, CATEGORIES, SocialPlatform } from '~/src/config/socialPlatforms';
+import { SocialsMap } from '~/src/types/ProfileTypes';
 
 type Props = {
-  initial?: SocialValues;
+  initial?: SocialsMap;
   currentStep: number;
   totalSteps: number;
   onBack: () => void;
-  onContinue: (data: SocialValues) => void;
+  onContinue: (data: SocialsMap) => void;
 };
 
 export default function SocialsCard({
@@ -26,111 +20,160 @@ export default function SocialsCard({
   onBack,
   onContinue,
 }: Props) {
-  // individual social states (keep flat + simple)
-  const [phone, setPhone] = useState(initial?.phone || '');
-  const [instagram, setInstagram] = useState(initial?.instagram || '');
-  const [x, setX] = useState(initial?.x || '');
-  const [linkedin, setLinkedin] = useState(initial?.linkedin || '');
-  const [extras, setExtras] = useState<string[]>(initial?.extras || []);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-  // derived boolean: at least one field has content
-  const hasAny = [phone, instagram, x, linkedin, ...extras].some((v) => v.trim().length > 0);
+  // Track which platforms are selected
+  const [selected, setSelected] = useState<Set<string>>(() => {
+    const set = new Set<string>();
+    if (initial) {
+      Object.keys(initial).forEach((key) => {
+        if (initial[key]?.trim()) set.add(key);
+      });
+    }
+    return set;
+  });
 
-  // add a new blank extra link
-  const addExtra = () => setExtras((prev) => [...prev, '']);
+  // Track values for each platform
+  const [values, setValues] = useState<SocialsMap>(initial ?? {});
 
-  // update a specific extra link by index
-  const updateExtra = (text: string, idx: number) =>
-    setExtras((prev) => prev.map((v, i) => (i === idx ? text : v)));
+  const togglePlatform = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        // Clear the value when deselecting
+        setValues((v) => {
+          const copy = { ...v };
+          delete copy[id];
+          return copy;
+        });
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
-  // Helper: clean extras before sending upward (trim, drop blanks, dedupe)
-  const sanitizeExtras = (values: string[]) => {
-    // Trim each, keep non-empty
-    const cleaned = values.map((v) => v.trim()).filter((v) => v.length > 0);
-    // Deduplicate while preserving order
-    return Array.from(new Set(cleaned));
+  const updateValue = (id: string, text: string) => {
+    setValues((prev) => ({ ...prev, [id]: text }));
+  };
+
+  // At least one platform must be selected and have a value
+  const hasAny = Array.from(selected).some((id) => values[id]?.trim());
+
+  const handleContinue = () => {
+    // Only include selected platforms with non-empty values
+    const result: SocialsMap = {};
+    selected.forEach((id) => {
+      const val = values[id]?.trim();
+      if (val) result[id] = val;
+    });
+    onContinue(result);
+  };
+
+  const renderPlatform = (platform: SocialPlatform) => {
+    const isSelected = selected.has(platform.id);
+    const Icon = platform.icon;
+
+    return (
+      <View key={platform.id} className="mb-2">
+        {/* Platform row — tap to toggle */}
+        <TouchableOpacity
+          onPress={() => togglePlatform(platform.id)}
+          className={`flex-row items-center rounded-xl px-3 py-3 ${
+            isSelected
+              ? 'bg-neutral-200 dark:bg-neutral-600'
+              : 'bg-neutral-100 dark:bg-neutral-700'
+          }`}
+          activeOpacity={0.7}>
+          {/* Icon */}
+          <View
+            className="h-9 w-9 items-center justify-center rounded-full"
+            style={{ backgroundColor: platform.color + '20' }}>
+            <Icon size={18} color={platform.color} />
+          </View>
+
+          {/* Label + description */}
+          <View className="ml-3 flex-1">
+            <Text className="text-sm font-semibold text-black dark:text-white">
+              {platform.label}
+            </Text>
+            <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+              {platform.description}
+            </Text>
+          </View>
+
+          {/* Checkbox */}
+          <View
+            className={`h-6 w-6 items-center justify-center rounded-full border-2 ${
+              isSelected
+                ? 'border-black bg-black dark:border-white dark:bg-white'
+                : 'border-neutral-300 dark:border-neutral-500'
+            }`}>
+            {isSelected && <Check size={14} color={isDark ? '#000' : '#fff'} strokeWidth={3} />}
+          </View>
+        </TouchableOpacity>
+
+        {/* Input field — shown when selected */}
+        {isSelected && (
+          <View className="mt-1 ml-12 mr-1 mb-1">
+            <TextInput
+              className="h-10 rounded-lg bg-white dark:bg-neutral-800 px-3 text-sm text-black dark:text-white"
+              placeholder={platform.placeholder}
+              placeholderTextColor="#9CA3AF"
+              value={values[platform.id] ?? ''}
+              onChangeText={(t) => updateValue(platform.id, t)}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
     <OnboardingCard
       currentStep={currentStep}
       totalSteps={totalSteps}
-      title="Link your social media"
-      subtitle="Add at least one socials.">
-      {/* Scroll to handle small screens; keep padding minimal */}
+      title="Link your socials"
+      subtitle="Select the platforms you use">
       <ScrollView
-        className="max-h-[420px]"
+        className="max-h-[380px]"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        {/* Phone */}
-        <Field label="Phone" placeholder="08123456789" value={phone} onChangeText={setPhone} />
-        {/* Instagram */}
-        <Field
-          label="Instagram"
-          placeholder="https://www.instagram.com/username"
-          value={instagram}
-          onChangeText={setInstagram}
-        />
-        {/* X / Twitter */}
-        <Field
-          label="X (Formerly Twitter)"
-          placeholder="https://x.com/handle"
-          value={x}
-          onChangeText={setX}
-        />
-        {/* LinkedIn */}
-        <Field
-          label="LinkedIn"
-          placeholder="https://www.linkedin.com/in/username"
-          value={linkedin}
-          onChangeText={setLinkedin}
-        />
-        {/* Dynamic extra links */}
-        {extras.map((val, idx) => (
-          <Field
-            key={idx}
-            label={`Extra Link ${idx + 1}`}
-            placeholder="https://..."
-            value={val}
-            onChangeText={(t) => updateExtra(t, idx)}
-          />
-        ))}
-
-        {/* Add new link trigger */}
-        <TouchableOpacity onPress={addExtra} className="mb-6 flex-row items-center">
-          <View className="mr-2 h-6 w-6 items-center justify-center rounded-full bg-black">
-            <Text className="text-sm text-white">+</Text>
-          </View>
-          <Text className="text-sm text-neutral-700">Click to add more links</Text>
-        </TouchableOpacity>
+        {CATEGORIES.map((cat) => {
+          const platforms = SOCIAL_PLATFORMS.filter((p) => p.category === cat.key);
+          return (
+            <View key={cat.key} className="mb-3">
+              <Text className="mb-2 text-xs font-bold uppercase text-neutral-400 dark:text-neutral-500">
+                {cat.label}
+              </Text>
+              {platforms.map(renderPlatform)}
+            </View>
+          );
+        })}
       </ScrollView>
 
-      {/* Actions row */}
-      <View className="mt-2 flex-row">
+      {/* Actions */}
+      <View className="mt-3 flex-row">
         <TouchableOpacity
           onPress={onBack}
-          className="mr-3 h-12 flex-1 flex-row items-center justify-center rounded-full border border-neutral-300">
-          <Text className="font-medium text-neutral-800">Back</Text>
+          className="mr-3 h-12 flex-1 flex-row items-center justify-center rounded-full border border-neutral-300 dark:border-neutral-600">
+          <Text className="font-medium text-neutral-800 dark:text-neutral-200">Back</Text>
         </TouchableOpacity>
         <TouchableOpacity
           disabled={!hasAny}
-          onPress={() =>
-            onContinue({
-              phone,
-              instagram,
-              // Map local 'x' state to canonical field name you store (twitter)
-              x,
-              linkedin,
-              // Pass sanitized extras
-              extras: sanitizeExtras(extras),
-            })
-          }
+          onPress={handleContinue}
           className={`h-12 flex-1 flex-row items-center justify-center rounded-full ${
-            hasAny ? 'bg-black' : 'bg-neutral-400'
+            hasAny ? 'bg-black dark:bg-white' : 'bg-neutral-400 dark:bg-neutral-600'
           }`}>
-          <Text className="mr-3 font-semibold text-white">Continue</Text>
-          <View className="h-8 w-8 items-center justify-center rounded-full bg-white">
-            <Text className="text-black">→</Text>
+          <Text className={`mr-3 font-semibold ${hasAny ? 'text-white dark:text-black' : 'text-white'}`}>
+            Continue
+          </Text>
+          <View className={`h-8 w-8 items-center justify-center rounded-full ${hasAny ? 'bg-white dark:bg-black' : 'bg-neutral-300'}`}>
+            <Text className={hasAny ? 'text-black dark:text-white' : 'text-white'}>→</Text>
           </View>
         </TouchableOpacity>
       </View>

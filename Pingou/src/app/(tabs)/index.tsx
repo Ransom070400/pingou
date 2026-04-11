@@ -63,7 +63,7 @@ const Index: React.FC = () => {
         {/* Header */}
         <ProfileHeader
           fullName={profile.fullname}
-          tagline={profile.nickname}
+          tagline={profile.bio || profile.nickname}
           avatarUrl={profile.profile_url}
         />
 

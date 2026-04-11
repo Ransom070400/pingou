@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, ScrollView, Text, Image, TouchableOpacity, Linking, Alert, useColorScheme } from 'react-native';
+import { View, ScrollView, Text, Image, TouchableOpacity, Linking, useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Mail, Phone, Instagram, Linkedin, Twitter, Globe, Link } from 'lucide-react-native';
+import { ArrowLeft, Mail, Phone } from 'lucide-react-native';
 import { supabase } from '~/src/lib/supabase';
 import { ProfileType } from '~/src/types/ProfileTypes';
 import { buildSocialLinks } from '~/src/utils/buildSocialLinks';
+import { getPlatformById } from '~/src/config/socialPlatforms';
 
 export default function ConnectionDetail() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -34,16 +35,6 @@ export default function ConnectionDetail() {
 
   const getInitials = (name: string) =>
     name.split(' ').map((n) => n.charAt(0)).join('').toUpperCase();
-
-  const getSocialIcon = (id: string) => {
-    switch (id) {
-      case 'instagram': return <Instagram size={20} color="#E4405F" />;
-      case 'twitter': return <Twitter size={20} color="#1DA1F2" />;
-      case 'linkedin': return <Linkedin size={20} color="#0A66C2" />;
-      case 'website': return <Globe size={20} color="#6B7280" />;
-      default: return <Link size={20} color="#6B7280" />;
-    }
-  };
 
   if (loading) {
     return (
@@ -79,7 +70,7 @@ export default function ConnectionDetail() {
 
         {/* Avatar + Name */}
         <View className="items-center pt-6">
-          <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-neutral-200 shadow-lg">
+          <View className="h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-neutral-200 shadow-lg dark:border-neutral-700">
             {profile.profile_url ? (
               <Image source={{ uri: profile.profile_url }} className="h-full w-full" resizeMode="cover" />
             ) : (
@@ -91,7 +82,11 @@ export default function ConnectionDetail() {
           <Text className="mt-4 text-2xl font-bold text-black dark:text-white">
             {profile.fullname}
           </Text>
-          <Text className="mt-1 text-sm text-neutral-500">@{profile.nickname}</Text>
+          {profile.bio ? (
+            <Text className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">"{profile.bio}"</Text>
+          ) : (
+            <Text className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">@{profile.nickname}</Text>
+          )}
         </View>
 
         {/* Contact Info */}
@@ -119,18 +114,28 @@ export default function ConnectionDetail() {
         {socialLinks.length > 0 && (
           <View className="mx-4 mt-4 rounded-2xl bg-white p-4 dark:bg-neutral-800">
             <Text className="mb-3 text-xs font-bold uppercase text-neutral-400">Socials</Text>
-            {socialLinks.map((link, idx) => (
-              <TouchableOpacity
-                key={link.id}
-                className={`flex-row items-center py-3 ${idx > 0 ? 'border-t border-neutral-100 dark:border-neutral-700' : ''}`}
-                onPress={() => Linking.openURL(link.url)}>
-                {getSocialIcon(link.id)}
-                <Text className="ml-3 flex-1 text-base text-black dark:text-white">{link.label}</Text>
-                <Text className="text-sm text-neutral-400" numberOfLines={1}>
-                  {link.url.replace(/^https?:\/\//, '')}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {socialLinks.map((link, idx) => {
+              const platform = getPlatformById(link.id);
+              const Icon = platform?.icon;
+              const color = link.color || '#6B7280';
+
+              return (
+                <TouchableOpacity
+                  key={link.id}
+                  className={`flex-row items-center py-3 ${idx > 0 ? 'border-t border-neutral-100 dark:border-neutral-700' : ''}`}
+                  onPress={() => Linking.openURL(link.url)}>
+                  <View
+                    className="h-8 w-8 items-center justify-center rounded-full"
+                    style={{ backgroundColor: color + '20' }}>
+                    {Icon ? <Icon size={16} color={color} /> : null}
+                  </View>
+                  <Text className="ml-3 flex-1 text-base text-black dark:text-white">{link.label}</Text>
+                  <Text className="text-sm text-neutral-400" numberOfLines={1}>
+                    {link.url.replace(/^https?:\/\//, '')}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>

@@ -1,13 +1,12 @@
-import { NameCardType } from '~/types/types';
-import { SocialValues } from '~/src/components/SocialsCard';
-import { ProfilePayload } from '~/types/types';
+import { NameCardType, ProfilePayload } from '~/types/types';
+import { SocialsMap } from '~/src/types/ProfileTypes';
 
 export const buildProfilePayload = (
   name?: NameCardType,
-  socials?: SocialValues,
+  socials?: SocialsMap,
   imageUri?: string
 ): ProfilePayload => ({
-  ...(name ?? {}),
-  ...(socials ?? {}),
+  ...(name ? { name: name.name, bio: name.bio } : {}),
+  ...(socials ? { socials } : {}),
   ...(imageUri ? { imageUri } : {}),
 });

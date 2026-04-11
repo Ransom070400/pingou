@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Image, Alert } from 'react-native';
 import NameCard from '../../components/NameCard';
-import SocialsCard, { SocialValues } from '../../components/SocialsCard';
+import SocialsCard from '../../components/SocialsCard';
 import AddProfileCard from '~/src/components/AddProfile';
 import { NameCardType } from '~/types/types';
+import { SocialsMap } from '~/src/types/ProfileTypes';
 import { buildProfilePayload } from '~/src/utils/buildProfilePayload';
 import { uploadOnboarding } from '~/src/utils/uploadOnboarding';
 import { useAuth } from '~/src/context/AuthProvider';
@@ -12,7 +13,7 @@ export default function OnboardingScreen() {
   const { setProfile } = useAuth();
   const [stepIndex, setStepIndex] = useState(0);
   const [nameData, setNameData] = useState<NameCardType>();
-  const [socialsData, setSocialsData] = useState<SocialValues>();
+  const [socialsData, setSocialsData] = useState<SocialsMap>();
   const [submitting, setSubmitting] = useState(false);
 
   const totalSteps = 3;
@@ -35,14 +36,12 @@ export default function OnboardingScreen() {
 
   return (
     <View className="flex-1 bg-neutral-100 dark:bg-neutral-900">
-      {/* Decorative top-right image */}
       <Image
         source={require('../../../assets/PingouLogoWOBG.png')}
         resizeMode="contain"
         className="absolute -right-10 -top-32 h-[500px] w-[400px]"
         style={{ transform: [{ translateX: 120 }, { translateY: 24 }, { rotate: '-20deg' }], opacity: 0.15 }}
       />
-      {/* Decorative bottom-left image */}
       <Image
         source={require('../../../assets/PingouLogoWOBG.png')}
         resizeMode="contain"
@@ -68,7 +67,7 @@ export default function OnboardingScreen() {
           <SocialsCard
             currentStep={2}
             totalSteps={totalSteps}
-            initial={socialsData ?? ({} as SocialValues)}
+            initial={socialsData ?? {}}
             onBack={() => setStepIndex(0)}
             onContinue={(data) => {
               setSocialsData(data);
