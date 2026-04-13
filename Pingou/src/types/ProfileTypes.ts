@@ -10,6 +10,7 @@ export interface ProfileType {
   phone?: string;
   profile_url?: string;
   socials: SocialsMap;
+  push_token?: string;
   created_at: string;
   updated_at: string;
 

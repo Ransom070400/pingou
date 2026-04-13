@@ -1,7 +1,8 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { ProfileType } from '../types/ProfileTypes';
+import { registerForPushNotifications } from '../utils/notifications';
 
 const AuthContext = createContext<{
   profile: ProfileType | null;
@@ -22,6 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const pushRegistered = useRef(false);
 
   // 1. Initialize session + subscribe to auth changes
   useEffect(() => {
@@ -91,6 +93,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       mounted = false;
     };
   }, [session, initialized]);
+
+  // 3. Register for push notifications once profile is loaded
+  useEffect(() => {
+    if (profile?.user_id && !pushRegistered.current) {
+      pushRegistered.current = true;
+      registerForPushNotifications(profile.user_id);
+    }
+    if (!profile) {
+      pushRegistered.current = false;
+    }
+  }, [profile]);
 
   return (
     <AuthContext.Provider value={{ profile, setProfile, loading, session }}>

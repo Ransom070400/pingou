@@ -1,45 +1,56 @@
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Alert, Image, RefreshControl } from 'react-native';
+import { useState, useCallback, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { FolderPlus } from 'lucide-react-native';
+import { FolderPlus, StickyNote } from 'lucide-react-native';
 import { router } from 'expo-router';
 import EmptyState from '~/src/components/EmptyState';
 import { supabase } from '~/src/lib/supabase';
 import { useAuth } from '~/src/context/AuthProvider';
 import { ProfileType } from '~/src/types/ProfileTypes';
 import { Feedback } from '~/src/utils/Feedback';
+import { useSearchQuery } from './_layout';
+import { ConnectionsSkeleton } from '~/src/components/Skeleton';
 
 type ConnectionWithProfile = {
   id: string;
   connected_to: string;
   folder: string | null;
+  note: string | null;
   created_at: string;
   profile: ProfileType;
 };
 
 const Connections = () => {
   const { session } = useAuth();
+  const { query } = useSearchQuery();
   const [connections, setConnections] = useState<ConnectionWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchConnections = useCallback(async () => {
     if (!session?.user?.id) return;
-    setLoading(true);
 
     const { data, error } = await supabase
       .from('connections')
-      .select('id, connected_to, folder, created_at, profiles!connections_connected_to_fkey(*)')
+      .select('id, connected_to, folder, note, created_at, profiles:connected_to(*)')
       .eq('owner_id', session.user.id)
       .order('created_at', { ascending: false });
 
+    if (error) {
+      console.error('fetchConnections error:', error);
+    }
+
     if (!error && data) {
-      const mapped = data.map((row: any) => ({
-        id: row.id,
-        connected_to: row.connected_to,
-        folder: row.folder,
-        created_at: row.created_at,
-        profile: row.profiles as ProfileType,
-      }));
+      const mapped = data
+        .map((row: any) => ({
+          id: row.id,
+          connected_to: row.connected_to,
+          folder: row.folder,
+          note: row.note,
+          created_at: row.created_at,
+          profile: row.profiles as ProfileType,
+        }))
+        .filter((c) => c.profile); // drop rows where the other user's profile is missing
       setConnections(mapped);
     }
     setLoading(false);
@@ -47,11 +58,32 @@ const Connections = () => {
 
   useFocusEffect(
     useCallback(() => {
+      setLoading(true);
       fetchConnections();
     }, [fetchConnections])
   );
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchConnections();
+    setRefreshing(false);
+  }, [fetchConnections]);
+
+  // Filter by search query (searches name, email, nickname, and notes)
+  const filtered = useMemo(() => {
+    if (!query.trim()) return connections;
+    const q = query.toLowerCase();
+    return connections.filter(
+      (c) =>
+        c.profile.fullname.toLowerCase().includes(q) ||
+        c.profile.email.toLowerCase().includes(q) ||
+        c.profile.nickname?.toLowerCase().includes(q) ||
+        c.note?.toLowerCase().includes(q)
+    );
+  }, [connections, query]);
+
   const deleteConnection = (connection: ConnectionWithProfile) => {
+    Feedback.heavy();
     Alert.alert(
       'Delete Connection',
       `Remove ${connection.profile.fullname} from your connections?`,
@@ -61,11 +93,7 @@ const Connections = () => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            const { error } = await supabase
-              .from('connections')
-              .delete()
-              .eq('id', connection.id);
-
+            const { error } = await supabase.from('connections').delete().eq('id', connection.id);
             if (error) {
               Alert.alert('Error', error.message);
             } else {
@@ -103,22 +131,20 @@ const Connections = () => {
             `Move ${connection.profile.fullname} to a folder`,
             options.map((name) => ({
               text: name,
-              style: name === 'Cancel' ? 'cancel' as const : name === 'Remove from folder' ? 'destructive' as const : 'default' as const,
-              onPress: name === 'Cancel'
-                ? undefined
-                : async () => {
-                    const newFolder = name === 'Remove from folder' ? null : name;
-                    const { error } = await supabase
-                      .from('connections')
-                      .update({ folder: newFolder })
-                      .eq('id', connection.id);
-                    if (error) {
-                      Alert.alert('Error', error.message);
-                    } else {
-                      Feedback.success();
-                      fetchConnections();
-                    }
-                  },
+              style: name === 'Cancel' ? ('cancel' as const) : name === 'Remove from folder' ? ('destructive' as const) : ('default' as const),
+              onPress:
+                name === 'Cancel'
+                  ? undefined
+                  : async () => {
+                      const newFolder = name === 'Remove from folder' ? null : name;
+                      const { error } = await supabase.from('connections').update({ folder: newFolder }).eq('id', connection.id);
+                      if (error) {
+                        Alert.alert('Error', error.message);
+                      } else {
+                        Feedback.success();
+                        fetchConnections();
+                      }
+                    },
             }))
           );
         },
@@ -136,6 +162,10 @@ const Connections = () => {
     Alert.alert(connection.profile.fullname, undefined, buttons);
   };
 
+  if (loading && connections.length === 0) {
+    return <ConnectionsSkeleton />;
+  }
+
   if (!loading && connections.length === 0) {
     return (
       <View className="flex-1 bg-white dark:bg-black">
@@ -148,49 +178,59 @@ const Connections = () => {
   }
 
   const getInitials = (name: string) =>
-    name
-      .split(' ')
-      .map((n) => n.charAt(0))
-      .join('')
-      .toUpperCase();
+    name.split(' ').map((n) => n.charAt(0)).join('').toUpperCase();
 
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <FlatList
-        data={connections}
+        data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 120 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListEmptyComponent={
+          query.trim() ? (
+            <View className="items-center pt-12">
+              <Text className="text-neutral-500">No results for "{query}"</Text>
+            </View>
+          ) : null
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             className="flex-row items-center border-b border-neutral-100 px-4 py-3 dark:border-neutral-800"
             onPress={() => router.push({ pathname: '/connectionDetail', params: { userId: item.connected_to } })}
             onLongPress={() => showConnectionActions(item)}
             activeOpacity={0.7}>
-            {/* Avatar circle */}
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700">
-              <Text className="text-sm font-bold text-neutral-600 dark:text-neutral-300">
-                {getInitials(item.profile.fullname)}
-              </Text>
+            {/* Avatar */}
+            <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+              {item.profile.profile_url ? (
+                <Image source={{ uri: item.profile.profile_url }} className="h-full w-full" resizeMode="cover" />
+              ) : (
+                <Text className="text-sm font-bold text-neutral-600 dark:text-neutral-300">
+                  {getInitials(item.profile.fullname)}
+                </Text>
+              )}
             </View>
-            {/* Name + email */}
+            {/* Name + email/note */}
             <View className="ml-3 flex-1">
-              <Text className="text-base font-semibold text-black dark:text-white">
-                {item.profile.fullname}
+              <View className="flex-row items-center">
+                <Text className="text-base font-semibold text-black dark:text-white" numberOfLines={1}>
+                  {item.profile.fullname}
+                </Text>
+                {item.note && (
+                  <StickyNote size={12} color="#D97706" style={{ marginLeft: 6 }} />
+                )}
+              </View>
+              <Text className="text-sm text-neutral-500" numberOfLines={1}>
+                {item.note || item.profile.email}
               </Text>
-              <Text className="text-sm text-neutral-500">{item.profile.email}</Text>
             </View>
-            {/* Folder badge or assign button */}
+            {/* Folder badge */}
             {item.folder ? (
-              <TouchableOpacity
-                onPress={() => showConnectionActions(item)}
-                className="rounded-full bg-amber-100 px-2 py-1">
+              <TouchableOpacity onPress={() => showConnectionActions(item)} className="rounded-full bg-amber-100 px-2 py-1">
                 <Text className="text-xs font-medium text-amber-700">{item.folder}</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity
-                onPress={() => showConnectionActions(item)}
-                hitSlop={8}
-                className="p-1">
+              <TouchableOpacity onPress={() => showConnectionActions(item)} hitSlop={8} className="p-1">
                 <FolderPlus size={18} color="#9CA3AF" />
               </TouchableOpacity>
             )}

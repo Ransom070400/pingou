@@ -38,9 +38,10 @@ export const uploadOnboarding = async (
       profile_url: profileUrl,
     };
 
+    // Upsert so retries don't fail with duplicate key errors
     const { data, error } = await supabase
       .from('profiles')
-      .insert(profileRow)
+      .upsert(profileRow, { onConflict: 'user_id' })
       .select()
       .single();
 

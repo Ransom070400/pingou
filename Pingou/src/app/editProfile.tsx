@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import { supabase } from '~/src/lib/supabase';
 import { useAuth } from '~/src/context/AuthProvider';
+import { Feedback } from '~/src/utils/Feedback';
 import { SocialsMap } from '~/src/types/ProfileTypes';
 import { SOCIAL_PLATFORMS, CATEGORIES } from '~/src/config/socialPlatforms';
 import {
@@ -94,6 +95,7 @@ export default function EditProfile() {
       return;
     }
 
+    Feedback.success();
     setProfile(data);
     router.back();
   };

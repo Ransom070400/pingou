@@ -7,6 +7,7 @@ import { supabase } from '~/src/lib/supabase';
 import { useAuth } from '~/src/context/AuthProvider';
 import { ProfileType } from '~/src/types/ProfileTypes';
 import { router } from 'expo-router';
+import { parseEventCodeFromScan, joinEventByCode } from '~/src/utils/events';
 
 const Scanner = () => {
   const [facing] = useState<CameraType>('back');
@@ -27,6 +28,27 @@ const Scanner = () => {
 
     if (!session?.user?.id) {
       Alert.alert('Error', 'You must be logged in to connect');
+      setScannedData(null);
+      return;
+    }
+
+    // Event QR: deep link of the form pingou://event/<CODE>
+    const eventCode = parseEventCodeFromScan(scannedUserId);
+    if (eventCode) {
+      try {
+        const folderId = await joinEventByCode(eventCode);
+        Feedback.success();
+        Alert.alert('Joined!', 'You are now part of this event', [
+          {
+            text: 'View',
+            onPress: () =>
+              router.push(`/eventFolder?folderId=${folderId}` as any),
+          },
+          { text: 'OK' },
+        ]);
+      } catch (err: any) {
+        Alert.alert('Could not join', err.message ?? 'Invalid event code');
+      }
       setScannedData(null);
       return;
     }
@@ -52,12 +74,9 @@ const Scanner = () => {
 
     const profile = scannedProfile as ProfileType;
 
-    // Create mutual connections (both directions)
+    // Create connection (your side)
     const { error: connError } = await supabase.from('connections').upsert(
-      [
-        { owner_id: session.user.id, connected_to: scannedUserId },
-        { owner_id: scannedUserId, connected_to: session.user.id },
-      ],
+      { owner_id: session.user.id, connected_to: scannedUserId },
       { onConflict: 'owner_id,connected_to', ignoreDuplicates: true }
     );
 

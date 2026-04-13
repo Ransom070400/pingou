@@ -12,6 +12,7 @@ export default function AuthLayout() {
         <Stack.Screen name="welcome" options={{ title: 'Welcome' }} />
         <Stack.Screen name="signin" options={{ title: 'Sign in' }} />
         <Stack.Screen name="signup" options={{ title: 'Sign up' }} />
+        <Stack.Screen name="forgotPassword" options={{ title: 'Forgot Password' }} />
       </Stack.Protected>
 
       {/* Has session but no profile yet → show onboarding (profile creation) */}

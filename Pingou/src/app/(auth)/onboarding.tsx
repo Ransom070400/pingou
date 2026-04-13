@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, Alert } from 'react-native';
+import Animated, { SlideInRight, SlideInLeft, SlideOutLeft, SlideOutRight } from 'react-native-reanimated';
 import NameCard from '../../components/NameCard';
 import SocialsCard from '../../components/SocialsCard';
 import AddProfileCard from '~/src/components/AddProfile';
@@ -15,8 +16,19 @@ export default function OnboardingScreen() {
   const [nameData, setNameData] = useState<NameCardType>();
   const [socialsData, setSocialsData] = useState<SocialsMap>();
   const [submitting, setSubmitting] = useState(false);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
 
   const totalSteps = 3;
+
+  const goForward = (next: number) => {
+    setDirection('forward');
+    setStepIndex(next);
+  };
+
+  const goBack = (prev: number) => {
+    setDirection('back');
+    setStepIndex(prev);
+  };
 
   const handleFinish = async (uri?: string) => {
     setSubmitting(true);
@@ -51,40 +63,54 @@ export default function OnboardingScreen() {
 
       <View className="flex-1 justify-center px-5">
         {stepIndex === 0 && (
-          <NameCard
-            currentStep={1}
-            totalSteps={totalSteps}
-            initialName={nameData?.name ?? ''}
-            initialBio={nameData?.bio ?? ''}
-            onContinue={(data) => {
-              setNameData(data);
-              setStepIndex(1);
-            }}
-          />
+          <Animated.View
+            key="step-0"
+            entering={direction === 'back' ? SlideInLeft.duration(300) : SlideInRight.duration(300)}
+            exiting={direction === 'forward' ? SlideOutLeft.duration(200) : SlideOutRight.duration(200)}>
+            <NameCard
+              currentStep={1}
+              totalSteps={totalSteps}
+              initialName={nameData?.name ?? ''}
+              initialBio={nameData?.bio ?? ''}
+              onContinue={(data) => {
+                setNameData(data);
+                goForward(1);
+              }}
+            />
+          </Animated.View>
         )}
 
         {stepIndex === 1 && (
-          <SocialsCard
-            currentStep={2}
-            totalSteps={totalSteps}
-            initial={socialsData ?? {}}
-            onBack={() => setStepIndex(0)}
-            onContinue={(data) => {
-              setSocialsData(data);
-              setStepIndex(2);
-            }}
-          />
+          <Animated.View
+            key="step-1"
+            entering={direction === 'back' ? SlideInLeft.duration(300) : SlideInRight.duration(300)}
+            exiting={direction === 'forward' ? SlideOutLeft.duration(200) : SlideOutRight.duration(200)}>
+            <SocialsCard
+              currentStep={2}
+              totalSteps={totalSteps}
+              initial={socialsData ?? {}}
+              onBack={() => goBack(0)}
+              onContinue={(data) => {
+                setSocialsData(data);
+                goForward(2);
+              }}
+            />
+          </Animated.View>
         )}
 
         {stepIndex === 2 && (
-          <AddProfileCard
-            currentStep={3}
-            totalSteps={totalSteps}
-            onBack={() => setStepIndex(1)}
-            onContinue={(uri) => {
-              handleFinish(uri);
-            }}
-          />
+          <Animated.View
+            key="step-2"
+            entering={direction === 'back' ? SlideInLeft.duration(300) : SlideInRight.duration(300)}>
+            <AddProfileCard
+              currentStep={3}
+              totalSteps={totalSteps}
+              onBack={() => goBack(1)}
+              onContinue={(uri) => {
+                handleFinish(uri);
+              }}
+            />
+          </Animated.View>
         )}
       </View>
     </View>

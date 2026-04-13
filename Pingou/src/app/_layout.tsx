@@ -43,6 +43,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name='editProfile' options={{ title: "Edit Profile", presentation: "modal", headerTransparent: true}} />
             <Stack.Screen name='connectionDetail' options={{ headerShown: false, presentation: "modal" }} />
+            <Stack.Screen name='eventFolder' options={{ headerShown: false }} />
           </Stack.Protected>
           <Stack.Screen name="modal" options={{ headerShown: false, presentation: "modal" }} />
         </Stack>
