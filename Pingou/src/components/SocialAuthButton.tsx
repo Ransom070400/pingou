@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react'
+import React, { memo } from 'react'
 import { Pressable, Text } from 'react-native'
 
 /**
@@ -8,9 +8,11 @@ import { Pressable, Text } from 'react-native'
 const SocialAuthButton = memo(function SocialAuthButton({
   label,
   onPress,
+  disabled,
 }: {
   label: string
   onPress?: () => void
+  disabled?: boolean
 }) {
   return (
     // Wrapper for button styling
@@ -19,9 +21,13 @@ const SocialAuthButton = memo(function SocialAuthButton({
       className="flex-1 h-11 rounded-full border border-neutral-300 items-center justify-center mx-1 bg-white active:opacity-80"
       // Provide a simple handler (no logic yet)
       onPress={onPress}
+      disabled={disabled}
+      style={disabled ? { opacity: 0.6 } : undefined}
     >
       {/* Text label (icon will be added later once we confirm icon library) */}
       <Text className="text-sm font-medium text-neutral-800">{label}</Text>
     </Pressable>
   )
 })
+
+export default SocialAuthButton

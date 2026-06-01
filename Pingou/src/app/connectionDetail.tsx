@@ -10,10 +10,11 @@ import {
   useColorScheme,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Mail, Phone, StickyNote } from 'lucide-react-native';
+import { ArrowLeft, Mail, Phone, StickyNote, Trash2 } from 'lucide-react-native';
 import { supabase } from '~/src/lib/supabase';
 import { useAuth } from '~/src/context/AuthProvider';
 import { ProfileType } from '~/src/types/ProfileTypes';
@@ -97,6 +98,31 @@ export default function ConnectionDetail() {
   const cancelEdit = () => {
     setNoteDraft(note);
     setEditingNote(false);
+  };
+
+  const handleRemoveConnection = () => {
+    if (!connectionId) return;
+    Feedback.heavy();
+    Alert.alert(
+      'Remove Connection',
+      `Remove ${profile?.fullname ?? 'this person'} from your connections?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await supabase.from('connections').delete().eq('id', connectionId);
+            if (error) {
+              Alert.alert('Error', error.message);
+              return;
+            }
+            Feedback.success();
+            router.back();
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -256,6 +282,16 @@ export default function ConnectionDetail() {
                 );
               })}
             </View>
+          )}
+
+          {/* Remove connection */}
+          {connectionId && (
+            <TouchableOpacity
+              onPress={handleRemoveConnection}
+              className="mx-4 mt-6 flex-row items-center justify-center rounded-2xl bg-white py-3.5 dark:bg-neutral-800">
+              <Trash2 size={16} color="#EF4444" />
+              <Text className="ml-2 text-sm font-medium text-red-500">Remove Connection</Text>
+            </TouchableOpacity>
           )}
         </ScrollView>
       </View>

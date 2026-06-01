@@ -16,6 +16,9 @@ import { buildSocialLinks } from '~/src/utils/buildSocialLinks';
 import { ProfileSkeleton } from '~/src/components/Skeleton';
 import { Feedback } from '~/src/utils/Feedback';
 
+// Every connection a user makes is worth this many Ping Tokens.
+const TOKENS_PER_CONNECTION = 10;
+
 const Index: React.FC = () => {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
@@ -151,7 +154,7 @@ const Index: React.FC = () => {
           avatarUrl={profile.profile_url}
         />
 
-        <StatsCard pingTokens={0} connections={connectionCount} />
+        <StatsCard pingTokens={connectionCount * TOKENS_PER_CONNECTION} connections={connectionCount} />
 
         <View className="mt-8">
           <ProfileQRCode userId={profile.user_id} />

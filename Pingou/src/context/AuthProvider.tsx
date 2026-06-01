@@ -31,12 +31,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const init = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
         if (mounted) {
           setSession(data.session ?? null);
         }
       } catch (err) {
         console.warn('Failed to get session:', err);
+        // Clear any stale/invalid tokens from storage so the user can sign in fresh.
+        try {
+          await supabase.auth.signOut();
+        } catch {}
         if (mounted) setSession(null);
       } finally {
         if (mounted) setInitialized(true);
@@ -44,8 +49,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
     init();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => {
-      if (mounted) setSession(sess);
+    const { data: listener } = supabase.auth.onAuthStateChange((event, sess) => {
+      if (!mounted) return;
+      if (event === 'TOKEN_REFRESHED' && !sess) {
+        setSession(null);
+        return;
+      }
+      setSession(sess);
     });
 
     return () => {

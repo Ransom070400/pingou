@@ -16,8 +16,13 @@ import { Mail, Lock } from 'lucide-react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { router } from 'expo-router';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
-import { handleLoginUtil, handleLoginWithAppleAuthUtil } from '~/src/utils/signInUtils';
+import {
+  handleLoginUtil,
+  handleLoginWithAppleAuthUtil,
+  handleLoginWithGoogleUtil,
+} from '~/src/utils/signInUtils';
 import { handleUserSignUp } from '~/src/utils/signUpUtils';
+import SocialAuthButton from '~/src/components/SocialAuthButton';
 import { Feedback } from '~/src/utils/Feedback';
 
 type Tab = 'signin' | 'signup';
@@ -33,6 +38,7 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -70,6 +76,17 @@ export default function AuthScreen() {
       }
     } catch (error) {
       if (error instanceof Error) Alert.alert(error.message);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setGoogleLoading(true);
+    const { success, error } = await handleLoginWithGoogleUtil();
+    setGoogleLoading(false);
+    if (success) {
+      router.replace(tab === 'signup' ? '/(auth)/onboarding' : '/(tabs)');
+    } else if (error?.message && error.message !== 'Google sign-in was cancelled') {
+      Alert.alert('Google Sign-In Error', error.message);
     }
   };
 
@@ -157,6 +174,15 @@ export default function AuthScreen() {
               />
             </View>
           )}
+
+          {/* Google Sign In */}
+          <View className="flex-row mb-5">
+            <SocialAuthButton
+              label={googleLoading ? 'Connecting…' : 'Continue with Google'}
+              onPress={handleGoogle}
+              disabled={googleLoading}
+            />
+          </View>
 
           {/* OR separator */}
           <View className="flex-row items-center mb-5">

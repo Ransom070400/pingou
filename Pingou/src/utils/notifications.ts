@@ -6,16 +6,19 @@ import { supabase } from '../lib/supabase';
 
 const isExpoGo = Constants.appOwnership === 'expo';
 
-// Configure how notifications appear when the app is in the foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Configure how notifications appear when the app is in the foreground.
+// Skip in Expo Go — remote push was removed in SDK 53+ and the handler errors on Android.
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+}
 
 /**
  * Registers for push notifications and saves the token to the user's profile.
@@ -60,9 +63,7 @@ export async function registerForPushNotifications(userId: string): Promise<stri
 
   // Get the Expo push token
   try {
-    const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
-    });
+    const tokenData = await Notifications.getExpoPushTokenAsync();
     const token = tokenData.data;
 
     // Save token to the user's profile in Supabase

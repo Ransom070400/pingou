@@ -8,11 +8,13 @@ import { useAuth } from '~/src/context/AuthProvider';
 import { ProfileType } from '~/src/types/ProfileTypes';
 import { router } from 'expo-router';
 import { parseEventCodeFromScan, joinEventByCode } from '~/src/utils/events';
+import ConnectionToast, { ConnectionToastData } from '~/src/components/ConnectionToast';
 
 const Scanner = () => {
   const [facing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedData, setScannedData] = useState<BarcodeScanningResult | null>(null);
+  const [toast, setToast] = useState<ConnectionToastData | null>(null);
   const { session } = useAuth();
 
   if (!permission) {
@@ -83,18 +85,14 @@ const Scanner = () => {
     if (connError) {
       Alert.alert('Error', connError.message);
     } else {
-      Feedback.success();
-      Alert.alert(
-        'Connected!',
-        `You and ${profile.fullname} are now connected`,
-        [
-          { text: 'OK', onPress: () => {} },
-          {
-            text: 'View Profile',
-            onPress: () => router.push({ pathname: '/connectionDetail', params: { userId: scannedUserId } }),
-          },
-        ]
-      );
+      // The signature "ping": chime + success haptic, then a non-blocking banner.
+      Feedback.ping();
+      setToast({
+        name: profile.fullname,
+        avatarUrl: profile.profile_url ?? null,
+        onPress: () =>
+          router.push({ pathname: '/connectionDetail', params: { userId: scannedUserId } }),
+      });
     }
 
     setScannedData(null);
@@ -126,6 +124,9 @@ const Scanner = () => {
           <QrCode size={200} color="rgba(255,255,255,0.6)" />
         </View>
       </CameraView>
+
+      {/* Connection success banner */}
+      <ConnectionToast data={toast} onHide={() => setToast(null)} />
     </View>
   );
 };
